@@ -1,0 +1,4755 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flight Duty Roster — November 2026</title>
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --surface: #ffffff;
+      --border: #000000;
+      --ui-border: #b8c4d0;
+      --text: #111827;
+      --muted: #4b5563;
+      --primary: #1d4ed8;
+      --primary-soft: #eff6ff;
+      --excel-shade: #e7e6e6;
+      --header-bg: #1e293b;
+      --header-text: #ffffff;
+      --filter-bg: #f1f5f9;
+      --danger: #b91c1c;
+      --success: #15803d;
+      --radius: 8px;
+
+      /* Dynamic zoom scale & Card View sizing */
+      --ui-scale: 1;
+      --card-min-w: 228px;
+      --card-font: 0.66rem;
+      --card-head-font: 0.74rem;
+      --card-meta-font: 0.64rem;
+      --card-pad-y: 1px;
+      --card-pad-x: 2px;
+      --card-btn-font: 0.60rem;
+      --card-btn-pad-y: 1px;
+      --card-btn-pad-x: 4px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.25;
+    }
+
+    .app {
+      max-width: 1900px;
+      margin: 0 auto;
+      padding: 6px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    /* Top Toolbar */
+    .topbar {
+      background: var(--surface);
+      border: 1px solid var(--ui-border);
+      border-radius: var(--radius);
+      padding: 8px 10px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+    }
+
+    .title-group h1 {
+      margin: 0;
+      font-size: clamp(0.98rem, 1.9vw, 1.2rem);
+      font-weight: 700;
+    }
+
+    .stats {
+      margin-top: 3px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.74rem;
+      color: var(--muted);
+    }
+
+    .badge {
+      background: #e2e8f0;
+      color: var(--text);
+      padding: 1px 7px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+
+    .month-switcher {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #f8fafc;
+      border: 1px solid var(--ui-border);
+      border-radius: 6px;
+      padding: 2px 5px;
+    }
+
+    .month-switcher select,
+    .month-switcher input {
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 2px 5px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .month-switcher input[type="number"] {
+      width: 60px;
+      text-align: center;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 5px;
+      flex: 1 1 auto;
+      justify-content: flex-end;
+    }
+
+    .search-box {
+      flex: 1 1 160px;
+      max-width: 220px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 5px 8px;
+      border: 1px solid var(--ui-border);
+      border-radius: 6px;
+      font-size: 0.8rem;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .search-box input:focus,
+    .cf-search input:focus,
+    .modal-form input:focus,
+    .modal-form select:focus,
+    .modal-form textarea:focus {
+      outline: 2px solid rgba(29, 78, 216, 0.25);
+      border-color: var(--primary);
+    }
+
+    .zoom-group {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--ui-border);
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .zoom-group .btn {
+      border: none;
+      border-right: 1px solid var(--ui-border);
+      border-radius: 0;
+      padding: 5px 8px;
+    }
+
+    .zoom-group .btn:last-child {
+      border-right: none;
+    }
+
+    .btn {
+      border: 1px solid var(--ui-border);
+      background: var(--surface);
+      color: var(--text);
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: #f1f5f9;
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #1e40af;
+    }
+
+    .btn-success {
+      background: var(--success);
+      border-color: var(--success);
+      color: #fff;
+    }
+
+    .btn-success:hover:not(:disabled) {
+      background: #166534;
+    }
+
+    .btn-danger {
+      color: var(--danger);
+      border-color: #fca5a5;
+      background: #fef2f2;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background: #fee2e2;
+    }
+
+    .btn-active {
+      background: #1e3a8a;
+      border-color: #1e3a8a;
+      color: #ffffff;
+    }
+
+    .btn-active:hover:not(:disabled) {
+      background: #1e40af;
+    }
+
+    /* Active Filter Chips */
+    .active-filters {
+      display: none;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 10px;
+      background: var(--surface);
+      border: 1px solid var(--ui-border);
+      border-radius: var(--radius);
+      font-size: 0.76rem;
+    }
+
+    .active-filters.visible {
+      display: flex;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--primary-soft);
+      color: #1e3a8a;
+      border: 1px solid #93c5fd;
+      padding: 1px 7px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    .chip button {
+      border: none;
+      background: none;
+      color: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0;
+      font-size: 0.92rem;
+      line-height: 1;
+    }
+
+    /* Responsive Filter Panel */
+    .filter-panel {
+      background: var(--surface);
+      border: 1px solid var(--ui-border);
+      border-radius: var(--radius);
+      padding: 9px;
+      display: none;
+    }
+
+    .filter-panel.open {
+      display: block;
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 7px;
+    }
+
+    .filter-field label {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 2px;
+      text-transform: uppercase;
+    }
+
+    /* Multi-Select Filter Trigger Button */
+    .ms-filter-btn {
+      width: 100%;
+      padding: 4px 6px;
+      border: 1px solid #64748b;
+      border-radius: 4px;
+      font-size: 0.78rem;
+      background: #ffffff;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      text-align: left;
+      overflow: hidden;
+    }
+
+    .ms-filter-btn:hover {
+      border-color: var(--primary);
+      background: #f8fafc;
+    }
+
+    .ms-filter-btn.has-filter {
+      background: var(--primary-soft);
+      border-color: var(--primary);
+      color: #1e3a8a;
+      font-weight: 700;
+    }
+
+    .ms-filter-label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1 1 auto;
+    }
+
+    .ms-filter-caret {
+      font-size: 0.65rem;
+      opacity: 0.7;
+      flex: 0 0 auto;
+    }
+
+    thead tr.filter-row .ms-filter-btn {
+      font-size: calc(0.76rem * var(--ui-scale));
+      padding: calc(4px * var(--ui-scale)) calc(6px * var(--ui-scale));
+    }
+
+    /* Multi-Select Column Filter Popover */
+    .cf-popup {
+      position: fixed;
+      z-index: 140;
+      background: #ffffff;
+      border: 1px solid #000000;
+      border-radius: 8px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.25);
+      width: 260px;
+      max-width: calc(100vw - 16px);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .cf-popup.open {
+      display: flex;
+    }
+
+    .cf-head {
+      padding: 7px 10px;
+      background: var(--header-bg);
+      color: #ffffff;
+      font-size: 0.78rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .cf-search {
+      padding: 6px 8px;
+      border-bottom: 1px solid #e2e8f0;
+      background: #f8fafc;
+    }
+
+    .cf-search input {
+      width: 100%;
+      padding: 5px 8px;
+      border: 1px solid #94a3b8;
+      border-radius: 5px;
+      font-size: 0.82rem;
+      background: #ffffff;
+    }
+
+    .cf-actions-top {
+      padding: 5px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      border-bottom: 1px solid #e2e8f0;
+      background: #f8fafc;
+    }
+
+    .cf-mini-btn {
+      border: 1px solid #94a3b8;
+      background: #ffffff;
+      color: var(--text);
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .cf-mini-btn:hover {
+      background: #e2e8f0;
+    }
+
+    .cf-list {
+      max-height: 240px;
+      overflow-y: auto;
+      padding: 4px 6px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .cf-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 5px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.82rem;
+      user-select: none;
+    }
+
+    .cf-item:hover {
+      background: #eff6ff;
+    }
+
+    .cf-item-left {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    .cf-item-left input[type="checkbox"] {
+      width: 15px;
+      height: 15px;
+      margin: 0;
+      flex: 0 0 auto;
+      cursor: pointer;
+    }
+
+    .cf-item-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .cf-item-count {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-weight: 600;
+      flex: 0 0 auto;
+    }
+
+    .cf-foot {
+      padding: 6px 8px;
+      border-top: 1px solid #e2e8f0;
+      background: #f8fafc;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cf-status {
+      font-size: 0.74rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    /* Table with All Black Borders, Centered Cells & Zoom Support */
+    .table-card {
+      background: var(--surface);
+      border: 1px solid #000000;
+      overflow: hidden;
+    }
+
+    .table-scroll {
+      width: 100%;
+      overflow: auto;
+      max-height: 70vh;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      min-width: calc(1060px * var(--ui-scale));
+      font-size: calc(0.82rem * var(--ui-scale));
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      background: var(--header-bg);
+      color: var(--header-text);
+      text-align: center;
+      padding: calc(7px * var(--ui-scale)) calc(6px * var(--ui-scale));
+      font-weight: 700;
+      border-right: 1px solid #000000;
+      border-bottom: 1px solid #000000;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    thead th:last-child,
+    tbody td:last-child,
+    tfoot td:last-child {
+      border-right: none;
+    }
+
+    .th-btn {
+      background: none;
+      border: none;
+      color: inherit;
+      font: inherit;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      width: 100%;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    .sort-icon {
+      opacity: 0.7;
+      font-size: calc(0.74rem * var(--ui-scale));
+    }
+
+    thead tr.filter-row th {
+      position: sticky;
+      top: 32px;
+      z-index: 2;
+      background: var(--filter-bg);
+      color: var(--text);
+      padding: calc(4px * var(--ui-scale));
+      border-right: 1px solid #000000;
+      border-bottom: 1px solid #000000;
+      text-align: center;
+    }
+
+    tbody td {
+      padding: 1px 2px;
+      border-right: 1px solid #000000;
+      border-bottom: 1px solid #000000;
+      white-space: nowrap;
+      vertical-align: middle;
+      text-align: center;
+    }
+
+    tbody tr.shaded td {
+      background-color: var(--excel-shade);
+    }
+
+    tbody tr:not(.shaded) td {
+      background-color: #ffffff;
+    }
+
+    tbody tr:hover td {
+      background-color: #eef4ff !important;
+    }
+
+    tbody td.cell-selected {
+      background-color: #bfdbfe !important;
+      box-shadow: inset 0 0 0 1px #1d4ed8;
+    }
+
+    /* Table Subtotal Footer Row */
+    tfoot td {
+      position: sticky;
+      bottom: 0;
+      z-index: 2;
+      background: #e2e8f0;
+      color: #0f172a;
+      font-weight: 800;
+      padding: calc(6px * var(--ui-scale)) calc(8px * var(--ui-scale));
+      border-top: 2px solid #000000;
+      border-right: 1px solid #000000;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    /* Flight cell with always-visible X C S buttons beside first flight number */
+    .flight-cell-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      width: 100%;
+      padding: 0 2px;
+    }
+
+    .flight-cell-wrap .cell-edit.w-flight {
+      min-width: calc(56px * var(--ui-scale));
+      width: calc(64px * var(--ui-scale));
+      flex: 0 1 auto;
+    }
+
+    .flight-mini-btns {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      flex: 0 0 auto;
+    }
+
+    .f-btn {
+      border: 1px solid #000000;
+      border-radius: 3px;
+      padding: calc(1px * var(--ui-scale)) calc(4px * var(--ui-scale));
+      font-size: calc(0.62rem * var(--ui-scale));
+      font-weight: 800;
+      line-height: 1.05;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .f-x {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    .f-x:hover {
+      background: #dc2626;
+      color: #ffffff;
+    }
+
+    .f-c {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .f-c:hover,
+    .f-c.active-c {
+      background: #d97706;
+      color: #ffffff;
+    }
+
+    .f-s {
+      background: #ede9fe;
+      color: #5b21b6;
+    }
+    .f-s:hover,
+    .f-s.active-s {
+      background: #7c3aed;
+      color: #ffffff;
+    }
+
+    .status-cancelled {
+      color: #b91c1c !important;
+      font-weight: 800 !important;
+    }
+
+    .status-suspended {
+      color: #6d28d9 !important;
+      font-weight: 800 !important;
+    }
+
+    /* Editable Centered Inputs + Excel Nav/Edit States */
+    .cell-edit {
+      width: 100%;
+      border: 2px solid transparent;
+      background: transparent;
+      color: var(--text);
+      font: inherit;
+      padding: calc(4px * var(--ui-scale)) calc(5px * var(--ui-scale));
+      border-radius: 2px;
+      min-width: calc(50px * var(--ui-scale));
+      text-align: center;
+    }
+
+    .cell-edit.w-date { min-width: calc(118px * var(--ui-scale)); }
+    .cell-edit.w-time { min-width: calc(84px * var(--ui-scale)); font-variant-numeric: tabular-nums; }
+    .cell-edit.w-flight { min-width: calc(64px * var(--ui-scale)); font-weight: 700; }
+    .cell-edit.w-num { min-width: calc(72px * var(--ui-scale)); font-variant-numeric: tabular-nums; }
+    .cell-edit.w-duty { min-width: calc(128px * var(--ui-scale)); }
+    .cell-edit.w-staff { min-width: calc(118px * var(--ui-scale)); }
+    .cell-edit.w-sm { min-width: calc(58px * var(--ui-scale)); }
+
+    .cell-edit:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.92);
+    }
+
+    .cell-edit.is-editing {
+      border-color: var(--success);
+      background: #ffffff !important;
+      box-shadow: inset 0 0 0 1px rgba(21, 128, 61, 0.25);
+    }
+
+    /* Row Actions */
+    .row-actions {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      padding: 0 1px;
+    }
+
+    .act-btn {
+      border: 1px solid #000000;
+      background: #ffffff;
+      color: #000000;
+      font-size: calc(0.68rem * var(--ui-scale));
+      font-weight: 700;
+      padding: calc(1px * var(--ui-scale)) calc(5px * var(--ui-scale));
+      border-radius: 3px;
+      cursor: pointer;
+      line-height: 1.15;
+    }
+
+    .act-btn:hover {
+      background: #e2e8f0;
+    }
+
+    .act-btn.del {
+      color: var(--danger);
+      border-color: #7f1d1d;
+    }
+
+    .act-btn.del:hover {
+      background: #fee2e2;
+    }
+
+    /* Flight Card View (Compact on Desktop, Larger & Touch-Friendly on Mobile, Scalable via Zoom) */
+    .cards-wrap {
+      display: none;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, calc(var(--card-min-w) * var(--ui-scale))), 1fr));
+      gap: calc(5px * var(--ui-scale));
+      align-items: start;
+    }
+
+    .cards-wrap.active {
+      display: grid;
+    }
+
+    .table-card.hidden {
+      display: none;
+    }
+
+    .cards-subtotal {
+      display: none;
+      margin-top: 6px;
+      background: #e2e8f0;
+      border: 1px solid #000000;
+      border-radius: 5px;
+      padding: 6px 12px;
+      font-size: calc(0.82rem * var(--ui-scale));
+      font-weight: 800;
+      color: #0f172a;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .cards-subtotal.active {
+      display: flex;
+    }
+
+    .flight-card {
+      background: #ffffff;
+      border: 1px solid #000000;
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .flight-card.shaded {
+      background: #f1f5f9;
+    }
+
+    .fc-top {
+      background: var(--header-bg);
+      color: #ffffff;
+      padding: calc(2px * var(--ui-scale)) calc(5px * var(--ui-scale));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      border-bottom: 1px solid #000000;
+    }
+
+    .fc-title {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 800;
+      font-size: calc(var(--card-head-font) * var(--ui-scale));
+      min-width: 0;
+    }
+
+    .fc-flight-inp {
+      width: calc(64px * var(--ui-scale));
+      border: 1px solid transparent;
+      background: transparent;
+      color: #ffffff;
+      font-weight: 800;
+      font-size: calc(var(--card-head-font) * var(--ui-scale));
+      text-align: center;
+      padding: 1px 2px;
+      border-radius: 2px;
+    }
+
+    .fc-flight-inp:focus {
+      outline: none;
+      background: #ffffff;
+      color: #000000;
+    }
+
+    .fc-count {
+      font-size: calc(var(--card-btn-font) * var(--ui-scale));
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.18);
+      padding: 1px 5px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .fc-top .f-btn {
+      font-size: calc(var(--card-btn-font) * var(--ui-scale));
+      padding: calc(var(--card-btn-pad-y) * var(--ui-scale)) calc(var(--card-btn-pad-x) * var(--ui-scale));
+    }
+
+    .fc-meta-strip {
+      display: grid;
+      grid-template-columns: 1.4fr 1.15fr 0.72fr 0.73fr;
+      border-bottom: 1px solid #000000;
+      background: #f8fafc;
+    }
+
+    .fc-meta-cell {
+      border-right: 1px solid #000000;
+      text-align: center;
+      padding: 0;
+    }
+
+    .fc-meta-cell:last-child {
+      border-right: none;
+    }
+
+    .fc-meta-cell input {
+      width: 100%;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text);
+      font-size: calc(var(--card-meta-font) * var(--ui-scale));
+      font-weight: 700;
+      text-align: center;
+      padding: calc(var(--card-pad-y) * var(--ui-scale)) 2px;
+      border-radius: 2px;
+    }
+
+    .fc-meta-cell input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: #ffffff;
+    }
+
+    .fc-table {
+      width: 100%;
+      min-width: 0;
+      table-layout: fixed;
+      border-collapse: collapse;
+      font-size: calc(var(--card-font) * var(--ui-scale));
+    }
+
+    .fc-table th {
+      background: #e2e8f0;
+      color: #0f172a;
+      font-weight: 700;
+      text-align: center;
+      padding: calc(var(--card-pad-y) * var(--ui-scale)) 2px;
+      border-bottom: 1px solid #000000;
+      border-right: 1px solid #000000;
+      font-size: calc(var(--card-meta-font) * var(--ui-scale));
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .fc-table th:last-child {
+      border-right: none;
+    }
+
+    .fc-table td {
+      padding: 0;
+      border-bottom: 1px solid #000000;
+      border-right: 1px solid #000000;
+      text-align: center;
+      vertical-align: middle;
+      background: #ffffff;
+    }
+
+    .flight-card.shaded .fc-table td {
+      background: var(--excel-shade);
+    }
+
+    .fc-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .fc-table td:last-child {
+      border-right: none;
+    }
+
+    .fc-table .cell-edit {
+      width: 100%;
+      min-width: 0;
+      border: 1px solid transparent;
+      padding: calc(var(--card-pad-y) * var(--ui-scale)) calc(var(--card-pad-x) * var(--ui-scale));
+      font-size: calc(var(--card-font) * var(--ui-scale));
+      line-height: 1.15;
+    }
+
+    .fc-table .row-actions {
+      gap: 2px;
+      padding: 0 2px;
+    }
+
+    .fc-table .act-btn {
+      font-size: calc(var(--card-btn-font) * var(--ui-scale));
+      padding: calc(var(--card-btn-pad-y) * var(--ui-scale)) calc(var(--card-btn-pad-x) * var(--ui-scale));
+      border-radius: 3px;
+    }
+
+    /* Excel Bottom Status Bar + Pagination */
+    .status-bar {
+      background: #1e293b;
+      color: #e2e8f0;
+      border-radius: var(--radius);
+      padding: 5px 10px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.74rem;
+    }
+
+    .status-left,
+    .status-right {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mode-pill {
+      padding: 1px 7px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 0.68rem;
+      background: #334155;
+      color: #f8fafc;
+    }
+
+    .mode-pill.edit {
+      background: #15803d;
+      color: #ffffff;
+    }
+
+    .pager {
+      background: var(--surface);
+      border: 1px solid var(--ui-border);
+      border-radius: var(--radius);
+      padding: 6px 10px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.78rem;
+    }
+
+    .pager-group {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .pager select {
+      padding: 3px 6px;
+      border-radius: 5px;
+      border: 1px solid var(--ui-border);
+      background: #fff;
+      font-size: 0.78rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 36px 16px;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    /* Staff Autocomplete Popup */
+    .ac-popup {
+      position: fixed;
+      z-index: 120;
+      background: #ffffff;
+      border: 1px solid #000000;
+      border-radius: 6px;
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.22);
+      max-height: 210px;
+      overflow-y: auto;
+      display: none;
+      min-width: 195px;
+      padding: 3px;
+    }
+
+    .ac-popup.open {
+      display: block;
+    }
+
+    .ac-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 6px 8px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      color: var(--text);
+    }
+
+    .ac-item:hover,
+    .ac-item.active {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .ac-tab-hint {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      background: rgba(255, 255, 255, 0.16);
+      color: inherit;
+      display: none;
+      white-space: nowrap;
+    }
+
+    .ac-item.active .ac-tab-hint {
+      display: inline-block;
+    }
+
+    /* Modals */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      z-index: 60;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      background: #fff;
+      border: 1px solid #000;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 540px;
+      max-height: 92vh;
+      overflow: auto;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal.modal-wide {
+      max-width: 880px;
+    }
+
+    .modal-header {
+      padding: 12px 16px;
+      background: var(--header-bg);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 700;
+      position: sticky;
+      top: 0;
+      z-index: 4;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.3rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .modal-form {
+      padding: 14px 16px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .modal-form .full {
+      grid-column: 1 / -1;
+    }
+
+    .modal-form label {
+      display: block;
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 3px;
+      text-transform: uppercase;
+    }
+
+    .modal-form input,
+    .modal-form select,
+    .modal-form textarea {
+      width: 100%;
+      padding: 7px 9px;
+      border: 1px solid #64748b;
+      border-radius: 5px;
+      font-size: 0.88rem;
+      background: #fff;
+      font-family: inherit;
+    }
+
+    .modal-note {
+      grid-column: 1 / -1;
+      font-size: 0.78rem;
+      color: #1e3a8a;
+      background: var(--primary-soft);
+      border: 1px solid #bfdbfe;
+      padding: 7px 10px;
+      border-radius: 6px;
+    }
+
+    .modal-footer {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 4px;
+      padding-top: 10px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    /* Weekly Schedule Modal */
+    .ws-body {
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .ws-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .ws-tab {
+      border: 1px solid #64748b;
+      background: #f8fafc;
+      color: var(--text);
+      padding: 5px 11px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .ws-tab.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .ws-table-wrap {
+      border: 1px solid #000;
+      overflow-x: auto;
+      max-height: 290px;
+    }
+
+    .ws-table {
+      width: 100%;
+      min-width: 580px;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    .ws-table th {
+      position: sticky;
+      top: 0;
+      background: var(--header-bg);
+      color: #fff;
+      padding: 6px 8px;
+      text-align: center;
+      border-right: 1px solid #000;
+      border-bottom: 1px solid #000;
+    }
+
+    .ws-table td {
+      padding: 5px 7px;
+      text-align: center;
+      border-right: 1px solid #000;
+      border-bottom: 1px solid #000;
+    }
+
+    .ws-table th:last-child,
+    .ws-table td:last-child {
+      border-right: none;
+    }
+
+    .ws-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .ws-duties-cell {
+      white-space: normal;
+      font-size: 0.74rem;
+      line-height: 1.25;
+      color: #1e293b;
+    }
+
+    .ws-add-box {
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .ws-add-box h3 {
+      margin: 0 0 8px 0;
+      font-size: 0.9rem;
+    }
+
+    .ws-days-checks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .ws-day-chk {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: #fff;
+      border: 1px solid #94a3b8;
+      border-radius: 5px;
+      padding: 3px 8px;
+      cursor: pointer;
+    }
+
+    .ws-day-chk input {
+      width: auto;
+      margin: 0;
+    }
+
+    .shortcuts-list {
+      padding: 14px 16px;
+      display: grid;
+      gap: 8px;
+      font-size: 0.85rem;
+    }
+
+    .shortcut-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .shortcut-row:last-child {
+      border-bottom: none;
+    }
+
+    kbd {
+      background: #f1f5f9;
+      border: 1px solid #94a3b8;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    /* Mobile Touch-Friendly Card & Input Sizing */
+    @media (max-width: 767px) {
+      :root {
+        --card-min-w: 310px;
+        --card-font: 0.92rem;
+        --card-head-font: 0.98rem;
+        --card-meta-font: 0.84rem;
+        --card-pad-y: 7px;
+        --card-pad-x: 5px;
+        --card-btn-font: 0.78rem;
+        --card-btn-pad-y: 4px;
+        --card-btn-pad-x: 8px;
+      }
+      .app { padding: 6px; }
+      .topbar { padding: 8px 10px; }
+      .controls { justify-content: stretch; }
+      .search-box { max-width: none; flex: 1 1 100%; }
+      .modal-form { grid-template-columns: 1fr; }
+      .cards-wrap {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      .fc-top {
+        padding: calc(5px * var(--ui-scale)) calc(8px * var(--ui-scale));
+      }
+      .fc-flight-inp {
+        width: calc(84px * var(--ui-scale));
+      }
+      .ac-item {
+        padding: 9px 10px;
+        font-size: 0.94rem;
+      }
+      .cf-item {
+        padding: 8px 6px;
+        font-size: 0.92rem;
+      }
+      .cf-item-left input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    @media print {
+      body { background: #fff; }
+      .topbar .controls,
+      .filter-panel,
+      .active-filters,
+      .pager,
+      .status-bar,
+      thead tr.filter-row,
+      .col-actions,
+      .flight-mini-btns,
+      .ac-popup,
+      .cf-popup {
+        display: none !important;
+      }
+      .table-scroll { max-height: none; overflow: visible; }
+      .cell-edit { border: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="title-group">
+        <h1 id="rosterHeading">Flight Duty Roster — November 2026</h1>
+        <div class="stats">
+          <div class="month-switcher" title="Switch month/year generated from Weekly Schedule">
+            <select id="monthSelect" aria-label="Month"></select>
+            <input type="number" id="yearInput" min="2020" max="2040" value="2026" aria-label="Year" />
+          </div>
+          <span class="badge" id="statRows">3,748 rows</span>
+          <span class="badge" id="statFlights">0 flights</span>
+          <span><strong>X</strong>=Delete • <strong>C</strong>=Cancel/Uncancel • <strong>S</strong>=Suspend/Unsuspend</span>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="search-box">
+          <input type="search" id="globalSearch" placeholder="Quick search (date, flight, duty, staff...)" />
+        </div>
+        <div class="zoom-group" role="group" aria-label="Zoom controls">
+          <button class="btn" id="zoomOutBtn" type="button" title="Zoom Out">A−</button>
+          <button class="btn" id="zoomResetBtn" type="button" title="Reset Zoom to 100%">100%</button>
+          <button class="btn" id="zoomInBtn" type="button" title="Zoom In">A+</button>
+        </div>
+        <button class="btn btn-success" id="openAddFlightBtn" type="button">+ Add Flight</button>
+        <button class="btn btn-primary" id="weeklyScheduleBtn" type="button">Weekly Schedule</button>
+        <button class="btn" id="dupBelowBtn" type="button" disabled title="Duplicate selected cell(s) below">↓ Duplicate Below</button>
+        <button class="btn btn-danger" id="clearCellsBtn" type="button" disabled title="Delete selected cells (Del)">⌫ Clear Cells</button>
+        <button class="btn" id="multiSelectBtn" type="button" title="Toggle tap-to-select multiple cells">Multi-Select</button>
+        <button class="btn" id="undoBtn" type="button" disabled title="Undo (Ctrl+Z)">↶ Undo</button>
+        <button class="btn" id="redoBtn" type="button" disabled title="Redo (Ctrl+Y)">↷ Redo</button>
+        <button class="btn" id="toggleFiltersBtn" type="button">Filters</button>
+        <button class="btn" id="toggleViewBtn" type="button">Card View</button>
+        <button class="btn" id="shortcutsBtn" type="button">Shortcuts</button>
+        <button class="btn" id="resetFiltersBtn" type="button">Reset Filters</button>
+        <button class="btn" id="exportBackupBtn" type="button">Export Backup</button>
+        <button class="btn" id="importBackupBtn" type="button">Import Backup</button>
+        <input type="file" id="importBackupInput" accept=".json,application/json" style="display:none;" />
+        <button class="btn btn-primary" id="exportCsvBtn" type="button">Export CSV</button>
+        <button class="btn btn-danger" id="resetDataBtn" type="button" style="display:none;">Reset All Changes</button>
+      </div>
+    </header>
+
+    <section class="filter-panel" id="mobileFilterPanel" aria-label="Column Filters"></section>
+    <div class="active-filters" id="activeFilters"></div>
+
+    <main>
+      <div class="table-card" id="tableCard">
+        <div class="table-scroll" id="tableScroll">
+          <table>
+            <thead>
+              <tr id="headerRow"></tr>
+              <tr class="filter-row" id="filterRow"></tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+            <tfoot id="tableFoot"></tfoot>
+          </table>
+          <div class="empty-state" id="tableEmpty" style="display:none;">
+            No matching rows found. Try clearing one or more filters.
+          </div>
+        </div>
+      </div>
+
+      <div class="cards-wrap" id="cardsWrap"></div>
+      <div class="cards-subtotal" id="cardsSubtotal"></div>
+    </main>
+
+    <!-- Excel-style Bottom Status Bar -->
+    <div class="status-bar">
+      <div class="status-left">
+        <span class="mode-pill" id="modePill">READY</span>
+        <span id="activeCellInfo">Click cell to edit at cursor • Double-click to select • F2 edit at end</span>
+      </div>
+      <div class="status-right">
+        <span id="statSelected">Selected: 0</span>
+        <span id="statAssigned">Assigned Staff: 0</span>
+        <span id="statUnassigned">Unassigned: 0</span>
+        <span id="statCoSum">SUBTOTAL CO HRS: 0</span>
+      </div>
+    </div>
+
+    <footer class="pager">
+      <div class="pager-group">
+        <span id="pagerInfo">Showing 0–0 of 0</span>
+        <label>
+          <span id="pageSizeLabel">Rows/page:</span>
+          <select id="pageSizeSelect">
+            <option value="100">100</option>
+            <option value="250" selected>250</option>
+            <option value="500">500</option>
+            <option value="all">All</option>
+          </select>
+        </label>
+      </div>
+      <div class="pager-group">
+        <button class="btn" id="prevPageBtn" type="button">Prev</button>
+        <span id="pageLabel">Page 1 / 1</span>
+        <button class="btn" id="nextPageBtn" type="button">Next</button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Shared Multi-Select Column Filter Popover -->
+  <div class="cf-popup" id="colFilterPopup" role="dialog" aria-label="Column Filter Options">
+    <div class="cf-head">
+      <span id="cfPopupTitle">Filter Column</span>
+      <button class="modal-close" id="cfCloseBtn" type="button" aria-label="Close">×</button>
+    </div>
+    <div class="cf-search">
+      <input type="search" id="cfSearchInput" placeholder="Search values..." autocomplete="off" />
+    </div>
+    <div class="cf-actions-top">
+      <button class="cf-mini-btn" id="cfSelectMatchingBtn" type="button">Select Matching</button>
+      <button class="cf-mini-btn" id="cfClearColBtn" type="button">Clear (All)</button>
+    </div>
+    <div class="cf-list" id="cfList"></div>
+    <div class="cf-foot">
+      <span class="cf-status" id="cfStatus">All shown</span>
+      <button class="btn btn-primary" id="cfDoneBtn" type="button" style="padding:4px 10px;">Done</button>
+    </div>
+  </div>
+
+  <!-- Shared Staff Autocomplete Popup -->
+  <div class="ac-popup" id="staffAcPopup" role="listbox" aria-label="Staff suggestions"></div>
+
+  <!-- Add Single Flight Modal -->
+  <div class="modal-backdrop" id="addFlightModal" role="dialog" aria-modal="true" aria-labelledby="addFlightTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <span id="addFlightTitle">Add Flight with Default Duties</span>
+        <button class="modal-close" id="closeAddFlightBtn" type="button" aria-label="Close">×</button>
+      </div>
+      <form class="modal-form" id="addFlightForm">
+        <div>
+          <label for="afDate">Date</label>
+          <input type="text" id="afDate" list="dateOptionsList" required placeholder="e.g. 01-Nov-26-Sun" />
+          <datalist id="dateOptionsList"></datalist>
+        </div>
+        <div>
+          <label for="afTime">TIME (Shift)</label>
+          <input type="text" id="afTime" list="timeOptionsList" required value="0600-1400" placeholder="e.g. 0600-1400" />
+          <datalist id="timeOptionsList">
+            <option value="0600-1400"></option>
+            <option value="1400-2200"></option>
+          </datalist>
+        </div>
+        <div>
+          <label for="afFlight">Flight</label>
+          <input type="text" id="afFlight" autocapitalize="characters" required placeholder="e.g. BG136" />
+        </div>
+        <div>
+          <label for="afSta">STA</label>
+          <input type="text" id="afSta" autocapitalize="characters" required placeholder="e.g. 0810" />
+        </div>
+        <div class="full">
+          <label for="afStd">STD (Determines Automatic Placement)</label>
+          <input type="text" id="afStd" autocapitalize="characters" required placeholder="e.g. 0910" />
+        </div>
+        <div class="full">
+          <label for="afTemplate">Default Duties Template</label>
+          <select id="afTemplate">
+            <option value="A">Standard 10 Duties (4× CHECK IN, BOARDING, BAB, COVERAGE, FINAL, LOADING, TRIM)</option>
+            <option value="B">Standard 10 Duties Alt (4× CHECK IN, BOARDING, BAB, COVERAGE, FINAL, TRIM, LOADING)</option>
+            <option value="C">DOM/INT 12 Duties (3× DOM, 3× INT, BOARDING, BAB, COVERAGE, FINAL, LOADING, TRIM)</option>
+            <option value="D">DOM/INT 11 Duties (3× DOM, 2× INT, BOARDING, BAB, COVERAGE, FINAL, LOADING, TRIM)</option>
+            <option value="F">6× Check-In 12 Duties (6× CHECK IN, BOARDING, BAB, COVERAGE, FINAL, LOADING, TRIM)</option>
+            <option value="E">Turnaround 9 Duties (1× DOM, 2× INT, BOARDING, BAB, COVERAGE, FINAL, TRIM, LOADING)</option>
+          </select>
+        </div>
+        <div class="modal-note">
+          Automatic placement by <strong>Date &amp; STD</strong>. Press <strong>C</strong> or <strong>S</strong> to toggle Cancelled/Suspended (press again to restore).
+        </div>
+        <div class="modal-footer">
+          <button class="btn" id="cancelAddFlightBtn" type="button">Cancel</button>
+          <button class="btn btn-success" type="submit">Add Flight Rows</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Weekly Flight Schedule Modal -->
+  <div class="modal-backdrop" id="weeklyModal" role="dialog" aria-modal="true" aria-labelledby="weeklyTitle">
+    <div class="modal modal-wide">
+      <div class="modal-header">
+        <span id="weeklyTitle">Weekly Flight Schedule</span>
+        <button class="modal-close" id="closeWeeklyBtn" type="button" aria-label="Close">×</button>
+      </div>
+      <div class="ws-body">
+        <div class="ws-tabs" id="wsDayTabs"></div>
+        <div class="ws-table-wrap">
+          <table class="ws-table">
+            <thead>
+              <tr>
+                <th style="width:92px;">TIME</th>
+                <th style="width:76px;">Flight</th>
+                <th style="width:66px;">STA</th>
+                <th style="width:66px;">STD</th>
+                <th>Duties Combination</th>
+                <th style="width:68px;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="wsTableBody"></tbody>
+          </table>
+        </div>
+
+        <form class="ws-add-box modal-form" id="wsAddForm" style="padding:12px;">
+          <h3 class="full">Add Flight to Weekly Schedule</h3>
+          <div class="full">
+            <label>Apply to Day(s) of Week</label>
+            <div class="ws-days-checks" id="wsDaysChecks"></div>
+          </div>
+          <div>
+            <label for="wsTime">TIME (Shift)</label>
+            <input type="text" id="wsTime" list="timeOptionsList" autocapitalize="characters" required value="0600-1400" />
+          </div>
+          <div>
+            <label for="wsFlight">Flight</label>
+            <input type="text" id="wsFlight" autocapitalize="characters" required placeholder="e.g. BG136" />
+          </div>
+          <div>
+            <label for="wsSta">STA</label>
+            <input type="text" id="wsSta" autocapitalize="characters" required placeholder="e.g. 0810" />
+          </div>
+          <div>
+            <label for="wsStd">STD</label>
+            <input type="text" id="wsStd" autocapitalize="characters" required placeholder="e.g. 0910" />
+          </div>
+          <div class="full">
+            <label for="wsPreset">Preferred Duties Preset</label>
+            <select id="wsPreset">
+              <option value="A">Standard 10 (4× CHECK IN, BOARDING, BAB, COVERAGE, FINAL, LOADING, TRIM)</option>
+              <option value="B">Standard 10 Alt (4× CHECK IN, BOARDING, BAB, COVERAGE, FINAL, TRIM, LOADING)</option>
+              <option value="C">DOM/INT 12 (3× DOM, 3× INT, BOARDING, BAB, COVERAGE, FINAL, LOADING, TRIM)</option>
+              <option value="D">DOM/INT 11 (3× DOM, 2× INT, BOARDING, BAB, COVERAGE, FINAL, LOADING, TRIM)</option>
+              <option value="F">6× Check-In 12 (6× CHECK IN, BOARDING, BAB, COVERAGE, FINAL, LOADING, TRIM)</option>
+              <option value="E">Turnaround 9 (1× DOM, 2× INT, BOARDING, BAB, COVERAGE, FINAL, TRIM, LOADING)</option>
+              <option value="H">DOM/INT 9 (2× DOM, 1× INT, BOARDING, BAB, COVERAGE, FINAL, LOADING, TRIM)</option>
+            </select>
+          </div>
+          <div class="full">
+            <label for="wsCustomDuties">Duties Combination (Edit comma-separated duties as needed)</label>
+            <textarea id="wsCustomDuties" rows="2" autocapitalize="characters" required></textarea>
+          </div>
+          <div class="modal-footer" style="padding-top:6px;">
+            <button class="btn" id="wsAllDaysBtn" type="button">Select All 7 Days</button>
+            <button class="btn btn-success" type="submit">+ Add to Weekly Schedule</button>
+          </div>
+        </form>
+
+        <div class="modal-footer" style="margin-top:0;">
+          <button class="btn btn-danger" id="wsResetDefaultBtn" type="button">Reset Default Weekly Schedule</button>
+          <button class="btn btn-primary" id="wsApplyToMonthBtn" type="button">Apply Schedule to Current Month</button>
+          <button class="btn" id="wsDoneBtn" type="button">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Excel Shortcuts Modal -->
+  <div class="modal-backdrop" id="shortcutsModal" role="dialog" aria-modal="true" aria-labelledby="shortcutsTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <span id="shortcutsTitle">Excel Keyboard Shortcuts</span>
+        <button class="modal-close" id="closeShortcutsBtn" type="button" aria-label="Close">×</button>
+      </div>
+      <div class="shortcuts-list">
+        <div class="shortcut-row"><span>Autocomplete Staff (1st suggestion) &amp; move right / down</span><span><kbd>Tab</kbd> / <kbd>Enter</kbd></span></div>
+        <div class="shortcut-row"><span>Select entire cell text</span><span><kbd>Double Click</kbd></span></div>
+        <div class="shortcut-row"><span>Edit cell with cursor at end</span><span><kbd>F2</kbd></span></div>
+        <div class="shortcut-row"><span>Move down / up one row</span><span><kbd>Enter</kbd> / <kbd>Shift</kbd>+<kbd>Enter</kbd></span></div>
+        <div class="shortcut-row"><span>Select multiple cells</span><span><kbd>Drag</kbd>, <kbd>Shift+Click</kbd>, <kbd>Shift+Arrows</kbd></span></div>
+        <div class="shortcut-row"><span>Delete selected cell(s) in Ready Mode</span><span><kbd>Delete</kbd> or <kbd>Backspace</kbd></span></div>
+        <div class="shortcut-row"><span>Fill down from cell above (Table &amp; Card View)</span><span><kbd>Ctrl</kbd>+<kbd>D</kbd></span></div>
+        <div class="shortcut-row"><span>Cancel edit &amp; revert cell value</span><span><kbd>Esc</kbd></span></div>
+        <div class="shortcut-row"><span>Copy cell / Paste multi-cell Excel range</span><span><kbd>Ctrl</kbd>+<kbd>C</kbd> / <kbd>Ctrl</kbd>+<kbd>V</kbd></span></div>
+        <div class="shortcut-row"><span>Undo / Redo changes</span><span><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd></span></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const COLUMNS = [
+        { key: "date", label: "Date", cls: "w-date" },
+        { key: "time", label: "TIME", cls: "w-time" },
+        { key: "flight", label: "Flight", cls: "w-flight" },
+        { key: "sta", label: "STA", cls: "w-num" },
+        { key: "std", label: "STD", cls: "w-num" },
+        { key: "duty", label: "Duty", cls: "w-duty" },
+        { key: "staff", label: "Staff", cls: "w-staff" },
+        { key: "nature", label: "Nature", cls: "w-sm" },
+        { key: "coHrs", label: "CO HRS", cls: "w-sm" }
+      ];
+
+      const CARD_META_COLS = [
+        { key: "date", label: "Date" },
+        { key: "time", label: "TIME" },
+        { key: "sta", label: "STA" },
+        { key: "std", label: "STD" }
+      ];
+
+      const CARD_DUTY_COLS = [
+        { key: "duty", label: "Duty" },
+        { key: "staff", label: "Staff" },
+        { key: "nature", label: "Nat" },
+        { key: "coHrs", label: "CO" }
+      ];
+
+      const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      const MONTH_NAMES_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const MONTH_NAMES_FULL = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+      ];
+
+      const DEFAULT_STAFF_NAMES = [
+        "ANSWER", "ASHFAQ", "AZAD", "CLC", "HASAN", "HIMEL",
+        "IMRAN", "ISTIAK", "JAHANGIR", "KALLOL", "MAHIN",
+        "MAMUN JR", "MAMUN SR", "RIPON", "SAHARA", "SAZZAD",
+        "ZAKARIA", "ZIA"
+      ];
+
+      const DUTY_PATTERNS = {
+        A: ["CHECK IN", "CHECK IN", "CHECK IN", "CHECK IN", "BOARDING", "BAB", "COVERAGE", "FINAL", "LOADING", "TRIM"],
+        B: ["CHECK IN", "CHECK IN", "CHECK IN", "CHECK IN", "BOARDING", "BAB", "COVERAGE", "FINAL", "TRIM", "LOADING"],
+        C: ["CHECK IN (DOM)", "CHECK IN (DOM)", "CHECK IN (DOM)", "CHECK IN (INT)", "CHECK IN (INT)", "CHECK IN (INT)", "BOARDING", "BAB", "COVERAGE", "FINAL", "LOADING", "TRIM"],
+        D: ["CHECK IN (DOM)", "CHECK IN (DOM)", "CHECK IN (DOM)", "CHECK IN (INT)", "CHECK IN (INT)", "BOARDING", "BAB", "COVERAGE", "FINAL", "LOADING", "TRIM"],
+        E: ["CHECK IN (DOM)", "CHECK IN (INT)", "CHECK IN (INT)", "BOARDING", "BAB", "COVERAGE", "FINAL", "TRIM", "LOADING"],
+        F: ["CHECK IN", "CHECK IN", "CHECK IN", "CHECK IN", "CHECK IN", "CHECK IN", "BOARDING", "BAB", "COVERAGE", "FINAL", "LOADING", "TRIM"],
+        G: ["CHECK IN", "CHECK IN", "CHECK IN", "BOARDING", "BAB", "COVERAGE", "FINAL", "TRIM", "LOADING"],
+        H: ["CHECK IN (DOM)", "CHECK IN (DOM)", "CHECK IN (INT)", "BOARDING", "BAB", "COVERAGE", "FINAL", "LOADING", "TRIM"]
+      };
+
+      const TEMPLATES = {
+        SUN_1: [
+          ["0600-1400", "G9527", "0650", "0750", "A"],
+          ["0600-1400", "FZ564", "0735", "0835", "B"],
+          ["0600-1400", "OV402", "0825", "0925", "A"],
+          ["0600-1400", "BG136", "0810", "0910", "C"],
+          ["0600-1400", "BG612", "0845", "0910", "E"],
+          ["1400-2200", "BG616", "1455", "1520", "E"],
+          ["1400-2200", "BG135", "1505", "1605", "F"],
+          ["1400-2200", "G9521", "2000", "2100", "B"],
+          ["1400-2200", "BG127", "2020", "2110", "A"],
+          ["1400-2200", "BG618", "2200", "2225", "E"],
+          ["1400-2200", "OV404", "2210", "2340", "A"]
+        ],
+        SUN: [
+          ["0600-1400", "G9527", "0650", "0750", "A"],
+          ["0600-1400", "FZ564", "0735", "0835", "A"],
+          ["0600-1400", "OV402", "0755", "0925", "A"],
+          ["0600-1400", "BG136", "0810", "0910", "C"],
+          ["0600-1400", "BG612", "0845", "0910", "E"],
+          ["1400-2200", "BG616", "1455", "1520", "E"],
+          ["1400-2200", "BG135", "1505", "1605", "F"],
+          ["1400-2200", "G9521", "2000", "2100", "A"],
+          ["1400-2200", "BG127", "2020", "2110", "A"],
+          ["1400-2200", "BG618", "2200", "2225", "E"],
+          ["1400-2200", "OV404", "2210", "2340", "A"]
+        ],
+        MON: [
+          ["0600-1400", "BG126", "0615", "0715", "C"],
+          ["0600-1400", "G9527", "0650", "0750", "A"],
+          ["0600-1400", "FZ564", "0740", "0840", "A"],
+          ["0600-1400", "OV402", "0755", "0925", "A"],
+          ["0600-1400", "BG612", "0845", "0910", "E"],
+          ["0600-1400", "BG148", "0855", "0955", "C"],
+          ["0600-1400", "BG128", "0935", "1020", "D"],
+          ["1400-2200", "BG616", "1455", "1520", "E"],
+          ["1400-2200", "3L062", "2000", "2100", "A"],
+          ["1400-2200", "G9521", "2000", "2100", "A"],
+          ["1400-2200", "BG127", "2035", "2125", "A"],
+          ["1400-2200", "BG618", "2200", "2225", "E"],
+          ["1400-2200", "OV404", "2210", "2340", "A"]
+        ],
+        TUE_3: [
+          ["0600-1400", "G9527", "0650", "0750", "A"],
+          ["0600-1400", "FZ564", "0735", "0835", "A"],
+          ["0600-1400", "OV402", "0755", "0925", "A"],
+          ["0600-1400", "BG152", "0800", "0845", "D"],
+          ["0600-1400", "BG138", "0835", "0935", "C"],
+          ["0600-1400", "BG148", "0855", "0955", "C"],
+          ["0600-1400", "BG121", "0915", "1015", "F"],
+          ["1400-2200", "BG616", "1455", "1520", "E"],
+          ["1400-2200", "G9521", "2000", "2100", "A"],
+          ["1400-2200", "BG618", "2200", "2225", "E"],
+          ["1400-2200", "OV404", "2210", "2340", "A"]
+        ],
+        TUE: [
+          ["0600-1400", "G9527", "0650", "0750", "A"],
+          ["0600-1400", "FZ564", "0735", "0835", "A"],
+          ["0600-1400", "OV402", "0755", "0925", "A"],
+          ["0600-1400", "BG152", "0800", "0845", "D"],
+          ["0600-1400", "BG138", "0835", "0935", "C"],
+          ["0600-1400", "BG148", "0855", "0955", "C"],
+          ["0600-1400", "BG121", "0915", "1015", "C"],
+          ["1400-2200", "BG616", "1455", "1520", "E"],
+          ["1400-2200", "G9521", "2000", "2100", "A"],
+          ["1400-2200", "BG618", "2200", "2225", "E"],
+          ["1400-2200", "OV404", "2210", "2340", "A"]
+        ],
+        WED: [
+          ["0600-1400", "G9527", "0650", "0750", "A"],
+          ["0600-1400", "FZ564", "0740", "0840", "A"],
+          ["0600-1400", "OV402", "0755", "0925", "A"],
+          ["0600-1400", "BG136", "0810", "0910", "C"],
+          ["0600-1400", "BG612", "0845", "0910", "E"],
+          ["0600-1400", "BG128", "0935", "1020", "D"],
+          ["1400-2200", "BG616", "1455", "1520", "E"],
+          ["1400-2200", "BG125", "1620", "1720", "F"],
+          ["1400-2200", "3L062", "2000", "2100", "A"],
+          ["1400-2200", "G9521", "2000", "2100", "A"],
+          ["1400-2200", "BG122", "2120", "2220", "F"],
+          ["1400-2200", "OV408", "2210", "2340", "A"]
+        ],
+        WED_11: [
+          ["0600-1400", "G9527", "0650", "0750", "A"],
+          ["0600-1400", "FZ564", "0740", "0840", "A"],
+          ["0600-1400", "OV402", "0755", "0925", "A"],
+          ["0600-1400", "BG136", "0810", "0910", "C"],
+          ["0600-1400", "BG612", "0845", "0910", "E"],
+          ["0600-1400", "BG128", "0935", "1020", "D"],
+          ["1400-2200", "BG616", "1455", "1520", "E"],
+          ["1400-2200", "BG125", "1620", "1720", "F"],
+          ["1400-2200", "3L062", "2000", "2100", "A"],
+          ["1400-2200", "G9521", "2000", "2100", "A"],
+          ["1400-2200", "BG122", "2120", "2220", "F"],
+          ["1400-2200", "OV408", "2210", "2340", "A"]
+        ],
+        THU: [
+          ["0600-1400", "BG126", "0615", "0720", "C"],
+          ["0600-1400", "G9527", "0650", "0750", "A"],
+          ["0600-1400", "FZ564", "0740", "0840", "A"],
+          ["0600-1400", "OV402", "0755", "0925", "A"],
+          ["0600-1400", "BG148", "0855", "0955", "C"],
+          ["0600-1400", "BG121", "0915", "1015", "C"],
+          ["1400-2200", "BG616", "1455", "1520", "E"],
+          ["1400-2200", "BG137", "1600", "1700", "F"],
+          ["1400-2200", "BG147", "1935", "2035", "F"],
+          ["1400-2200", "G9521", "2000", "2100", "A"],
+          ["1400-2200", "BG618", "2200", "2225", "E"],
+          ["1400-2200", "OV404", "2210", "2340", "A"]
+        ],
+        FRI: [
+          ["0600-1400", "G9527", "0650", "0750", "A"],
+          ["0600-1400", "FZ564", "0735", "0835", "A"],
+          ["0600-1400", "OV402", "0755", "0925", "A"],
+          ["0600-1400", "BG136", "0810", "0910", "C"],
+          ["0600-1400", "BG121", "0915", "1015", "C"],
+          ["0600-1400", "BG128", "0935", "1020", "D"],
+          ["1400-2200", "BG616", "1455", "1520", "E"],
+          ["1400-2200", "BG135", "1505", "1605", "F"],
+          ["1400-2200", "BG151", "1930", "2015", "A"],
+          ["1400-2200", "G9521", "2000", "2100", "A"],
+          ["1400-2200", "BG127", "2035", "2125", "A"],
+          ["1400-2200", "BG618", "2200", "2225", "E"],
+          ["1400-2200", "OV404", "2210", "2340", "A"]
+        ],
+        SAT: [
+          ["0600-1400", "G9527", "0650", "0750", "A"],
+          ["0600-1400", "FZ564", "0735", "0835", "A"],
+          ["0600-1400", "OV402", "0755", "0925", "A"],
+          ["0600-1400", "BG138", "0835", "0935", "C"],
+          ["0600-1400", "BG612", "0845", "0910", "E"],
+          ["0600-1400", "BG148", "0855", "0955", "C"],
+          ["1400-2200", "BG616", "1455", "1520", "E"],
+          ["1400-2200", "BG147", "1935", "2035", "F"],
+          ["1400-2200", "G9521", "2000", "2100", "A"],
+          ["1400-2200", "BG122", "2120", "2220", "F"],
+          ["1400-2200", "OV404", "2210", "2340", "A"]
+        ]
+      };
+
+      const NOV_2026_DAYS = [
+        ["01-Nov-26-Sun", "SUN_1"], ["02-Nov-26-Mon", "MON"], ["03-Nov-26-Tue", "TUE_3"],
+        ["04-Nov-26-Wed", "WED"],   ["05-Nov-26-Thu", "THU"], ["06-Nov-26-Fri", "FRI"], ["07-Nov-26-Sat", "SAT"],
+        ["08-Nov-26-Sun", "SUN"],   ["09-Nov-26-Mon", "MON"], ["10-Nov-26-Tue", "TUE"],
+        ["11-Nov-26-Wed", "WED_11"],["12-Nov-26-Thu", "THU"], ["13-Nov-26-Fri", "FRI"], ["14-Nov-26-Sat", "SAT"],
+        ["15-Nov-26-Sun", "SUN"],   ["16-Nov-26-Mon", "MON"], ["17-Nov-26-Tue", "TUE"],
+        ["18-Nov-26-Wed", "WED"],   ["19-Nov-26-Thu", "THU"], ["20-Nov-26-Fri", "FRI"], ["21-Nov-26-Sat", "SAT"],
+        ["22-Nov-26-Sun", "SUN"],   ["23-Nov-26-Mon", "MON"], ["24-Nov-26-Tue", "TUE"],
+        ["25-Nov-26-Wed", "WED"],   ["26-Nov-26-Thu", "THU"], ["27-Nov-26-Fri", "FRI"], ["28-Nov-26-Sat", "SAT"],
+        ["29-Nov-26-Sun", "SUN"],   ["30-Nov-26-Mon", "MON"]
+      ];
+
+      const STORAGE_KEY = "flight_roster_app_state_v3";
+      const ZOOM_STORAGE_KEY = "flight_roster_zoom_v1";
+
+      function buildDefaultWeeklySchedule() {
+        const map = { Sun: "SUN", Mon: "MON", Tue: "TUE", Wed: "WED", Thu: "THU", Fri: "FRI", Sat: "SAT" };
+        const sched = {};
+        for (const dayKey of WEEKDAYS) {
+          sched[dayKey] = TEMPLATES[map[dayKey]].map(([time, flight, sta, std, patKey]) => ({
+            time,
+            flight,
+            sta,
+            std,
+            duties: DUTY_PATTERNS[patKey].slice()
+          }));
+        }
+        return sched;
+      }
+
+      function buildNov2026ExactRows() {
+        const rows = [];
+        let excelRow = 7;
+        for (const [date, tplKey] of NOV_2026_DAYS) {
+          for (const [time, flight, sta, std, patKey] of TEMPLATES[tplKey]) {
+            const duties = DUTY_PATTERNS[patKey];
+            for (let dIdx = 0; dIdx < duties.length; dIdx++) {
+              const duty = duties[dIdx];
+              const isCoRow = (
+                (date === "01-Nov-26-Sun" && flight === "G9527" && dIdx === 0) ||
+                (date === "01-Nov-26-Sun" && flight === "BG136" && duty === "LOADING") ||
+                (date === "01-Nov-26-Sun" && flight === "BG612" && duty === "LOADING")
+              );
+              rows.push({
+                id: excelRow,
+                date,
+                time,
+                flight,
+                sta,
+                std,
+                duty,
+                staff: "",
+                nature: isCoRow ? "CO" : "",
+                coHrs: isCoRow ? "8" : "",
+                isNewFlight: false,
+                flightGroupId: 0,
+                savedRows: null,
+                isFlightStart: false,
+                shaded: false
+              });
+              excelRow++;
+            }
+          }
+        }
+        return rows;
+      }
+
+      function parseStdValue(str) {
+        const cleaned = String(str).replace(/:/g, "").trim();
+        const num = parseInt(cleaned, 10);
+        return isNaN(num) ? Number.MAX_SAFE_INTEGER : num;
+      }
+
+      function generateMonthRows(year, monthIndex, schedule, startUid) {
+        const daysInMonth = new Date(Date.UTC(year, monthIndex + 1, 0)).getUTCDate();
+        const yy = String(year).slice(-2);
+        const monShort = MONTH_NAMES_SHORT[monthIndex];
+        const rows = [];
+        let uid = startUid || 1;
+
+        for (let day = 1; day <= daysInMonth; day++) {
+          const dt = new Date(Date.UTC(year, monthIndex, day));
+          const dayName = WEEKDAYS[dt.getUTCDay()];
+          const dateStr = `${String(day).padStart(2, "0")}-${monShort}-${yy}-${dayName}`;
+          const dayFlights = (schedule[dayName] || []).slice().sort((a, b) => parseStdValue(a.std) - parseStdValue(b.std));
+
+          for (const fl of dayFlights) {
+            const duties = Array.isArray(fl.duties) && fl.duties.length ? fl.duties : DUTY_PATTERNS.A;
+            for (const duty of duties) {
+              rows.push({
+                id: uid++,
+                date: dateStr,
+                time: fl.time,
+                flight: fl.flight,
+                sta: fl.sta,
+                std: fl.std,
+                duty,
+                staff: "",
+                nature: "",
+                coHrs: "",
+                isNewFlight: false,
+                flightGroupId: 0,
+                savedRows: null,
+                isFlightStart: false,
+                shaded: false
+              });
+            }
+          }
+        }
+        return rows;
+      }
+
+      function serializeRows(rows, includeSaved) {
+        return rows.map((r) => [
+          r.id, r.date, r.time, r.flight, r.sta, r.std, r.duty, r.staff, r.nature, r.coHrs,
+          r.isNewFlight ? 1 : 0, r.flightGroupId || 0,
+          includeSaved && r.savedRows ? serializeRows(r.savedRows, false) : null
+        ]);
+      }
+
+      function hydrateRows(compact) {
+        return compact.map((arr) => ({
+          id: arr[0],
+          date: arr[1],
+          time: arr[2],
+          flight: arr[3],
+          sta: arr[4],
+          std: arr[5],
+          duty: arr[6],
+          staff: arr[7],
+          nature: arr[8],
+          coHrs: arr[9],
+          isNewFlight: Boolean(arr[10]),
+          flightGroupId: arr[11] || 0,
+          savedRows: Array.isArray(arr[12]) ? hydrateRows(arr[12]) : null,
+          isFlightStart: false,
+          shaded: false
+        }));
+      }
+
+      let hasCustomChanges = false;
+      let activeMonthKey = "2026-11";
+      let weeklySchedule = buildDefaultWeeklySchedule();
+      let rostersByMonth = {};
+
+      function loadAppState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) {
+            rostersByMonth["2026-11"] = serializeRows(buildNov2026ExactRows(), true);
+            return hydrateRows(rostersByMonth["2026-11"]);
+          }
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.rostersByMonth && parsed.weeklySchedule) {
+            hasCustomChanges = true;
+            weeklySchedule = parsed.weeklySchedule;
+            rostersByMonth = parsed.rostersByMonth;
+            activeMonthKey = parsed.activeMonth || "2026-11";
+            if (!rostersByMonth[activeMonthKey]) {
+              const [y, m] = activeMonthKey.split("-").map(Number);
+              const gen = activeMonthKey === "2026-11"
+                ? buildNov2026ExactRows()
+                : generateMonthRows(y, m - 1, weeklySchedule, 1);
+              rostersByMonth[activeMonthKey] = serializeRows(gen, true);
+            }
+            return hydrateRows(rostersByMonth[activeMonthKey]);
+          }
+        } catch (e) {}
+        rostersByMonth["2026-11"] = serializeRows(buildNov2026ExactRows(), true);
+        return hydrateRows(rostersByMonth["2026-11"]);
+      }
+
+      let allRows = loadAppState();
+
+      let saveTimer = null;
+      function scheduleSave() {
+        hasCustomChanges = true;
+        el.resetDataBtn.style.display = "inline-flex";
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(() => {
+          try {
+            rostersByMonth[activeMonthKey] = serializeRows(allRows, true);
+            const payload = {
+              activeMonth: activeMonthKey,
+              weeklySchedule,
+              rostersByMonth
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+          } catch (e) {}
+        }, 180);
+      }
+
+      let nextUid = allRows.reduce((m, r) => Math.max(m, Number(r.id) || 0), 0) + 1;
+      let nextGroupId = allRows.reduce((m, r) => Math.max(m, Number(r.flightGroupId) || 0), 0) + 1;
+
+      function flightBlockKey(r) {
+        return `${r.date}|${r.time}|${r.flight}|${r.sta}|${r.std}|${r.flightGroupId || 0}`;
+      }
+
+      function recomputeShadingAndStarts() {
+        let prevKey = null;
+        let shaded = false;
+        for (const r of allRows) {
+          const k = flightBlockKey(r);
+          const isStart = k !== prevKey;
+          if (isStart) {
+            shaded = prevKey === null ? true : !shaded;
+            prevKey = k;
+          }
+          r.isFlightStart = isStart;
+          r.shaded = shaded;
+        }
+      }
+
+      recomputeShadingAndStarts();
+
+      function loadZoom() {
+        try {
+          const z = parseFloat(localStorage.getItem(ZOOM_STORAGE_KEY));
+          if (!isNaN(z) && z >= 0.7 && z <= 1.8) return Math.round(z * 10) / 10;
+        } catch (e) {}
+        return 1;
+      }
+
+      const state = {
+        filters: {
+          date: new Set(),
+          time: new Set(),
+          flight: new Set(),
+          sta: new Set(),
+          std: new Set(),
+          duty: new Set(),
+          staff: new Set(),
+          nature: new Set(),
+          coHrs: new Set()
+        },
+        globalSearch: "",
+        sortKey: null,
+        sortDir: 1,
+        page: 1,
+        pageSize: 250,
+        viewMode: window.innerWidth < 768 ? "cards" : "table",
+        filtersOpen: window.innerWidth < 768,
+        multiSelectMode: false,
+        zoom: loadZoom()
+      };
+
+      const el = {
+        rosterHeading: document.getElementById("rosterHeading"),
+        monthSelect: document.getElementById("monthSelect"),
+        yearInput: document.getElementById("yearInput"),
+        zoomOutBtn: document.getElementById("zoomOutBtn"),
+        zoomResetBtn: document.getElementById("zoomResetBtn"),
+        zoomInBtn: document.getElementById("zoomInBtn"),
+        headerRow: document.getElementById("headerRow"),
+        filterRow: document.getElementById("filterRow"),
+        tableBody: document.getElementById("tableBody"),
+        tableFoot: document.getElementById("tableFoot"),
+        tableEmpty: document.getElementById("tableEmpty"),
+        tableCard: document.getElementById("tableCard"),
+        tableScroll: document.getElementById("tableScroll"),
+        cardsWrap: document.getElementById("cardsWrap"),
+        cardsSubtotal: document.getElementById("cardsSubtotal"),
+        mobileFilterPanel: document.getElementById("mobileFilterPanel"),
+        activeFilters: document.getElementById("activeFilters"),
+        globalSearch: document.getElementById("globalSearch"),
+        openAddFlightBtn: document.getElementById("openAddFlightBtn"),
+        weeklyScheduleBtn: document.getElementById("weeklyScheduleBtn"),
+        dupBelowBtn: document.getElementById("dupBelowBtn"),
+        clearCellsBtn: document.getElementById("clearCellsBtn"),
+        multiSelectBtn: document.getElementById("multiSelectBtn"),
+        undoBtn: document.getElementById("undoBtn"),
+        redoBtn: document.getElementById("redoBtn"),
+        toggleFiltersBtn: document.getElementById("toggleFiltersBtn"),
+        toggleViewBtn: document.getElementById("toggleViewBtn"),
+        shortcutsBtn: document.getElementById("shortcutsBtn"),
+        resetFiltersBtn: document.getElementById("resetFiltersBtn"),
+        exportBackupBtn: document.getElementById("exportBackupBtn"),
+        importBackupBtn: document.getElementById("importBackupBtn"),
+        importBackupInput: document.getElementById("importBackupInput"),
+        exportCsvBtn: document.getElementById("exportCsvBtn"),
+        resetDataBtn: document.getElementById("resetDataBtn"),
+        statRows: document.getElementById("statRows"),
+        statFlights: document.getElementById("statFlights"),
+        modePill: document.getElementById("modePill"),
+        activeCellInfo: document.getElementById("activeCellInfo"),
+        statSelected: document.getElementById("statSelected"),
+        statAssigned: document.getElementById("statAssigned"),
+        statUnassigned: document.getElementById("statUnassigned"),
+        statCoSum: document.getElementById("statCoSum"),
+        pagerInfo: document.getElementById("pagerInfo"),
+        pageSizeLabel: document.getElementById("pageSizeLabel"),
+        pageSizeSelect: document.getElementById("pageSizeSelect"),
+        prevPageBtn: document.getElementById("prevPageBtn"),
+        nextPageBtn: document.getElementById("nextPageBtn"),
+        pageLabel: document.getElementById("pageLabel"),
+        colFilterPopup: document.getElementById("colFilterPopup"),
+        cfPopupTitle: document.getElementById("cfPopupTitle"),
+        cfCloseBtn: document.getElementById("cfCloseBtn"),
+        cfSearchInput: document.getElementById("cfSearchInput"),
+        cfSelectMatchingBtn: document.getElementById("cfSelectMatchingBtn"),
+        cfClearColBtn: document.getElementById("cfClearColBtn"),
+        cfList: document.getElementById("cfList"),
+        cfStatus: document.getElementById("cfStatus"),
+        cfDoneBtn: document.getElementById("cfDoneBtn"),
+        staffAcPopup: document.getElementById("staffAcPopup"),
+        addFlightModal: document.getElementById("addFlightModal"),
+        closeAddFlightBtn: document.getElementById("closeAddFlightBtn"),
+        cancelAddFlightBtn: document.getElementById("cancelAddFlightBtn"),
+        addFlightForm: document.getElementById("addFlightForm"),
+        afDate: document.getElementById("afDate"),
+        afTime: document.getElementById("afTime"),
+        afFlight: document.getElementById("afFlight"),
+        afSta: document.getElementById("afSta"),
+        afStd: document.getElementById("afStd"),
+        afTemplate: document.getElementById("afTemplate"),
+        dateOptionsList: document.getElementById("dateOptionsList"),
+        weeklyModal: document.getElementById("weeklyModal"),
+        closeWeeklyBtn: document.getElementById("closeWeeklyBtn"),
+        wsDoneBtn: document.getElementById("wsDoneBtn"),
+        wsDayTabs: document.getElementById("wsDayTabs"),
+        wsTableBody: document.getElementById("wsTableBody"),
+        wsAddForm: document.getElementById("wsAddForm"),
+        wsDaysChecks: document.getElementById("wsDaysChecks"),
+        wsTime: document.getElementById("wsTime"),
+        wsFlight: document.getElementById("wsFlight"),
+        wsSta: document.getElementById("wsSta"),
+        wsStd: document.getElementById("wsStd"),
+        wsPreset: document.getElementById("wsPreset"),
+        wsCustomDuties: document.getElementById("wsCustomDuties"),
+        wsAllDaysBtn: document.getElementById("wsAllDaysBtn"),
+        wsResetDefaultBtn: document.getElementById("wsResetDefaultBtn"),
+        wsApplyToMonthBtn: document.getElementById("wsApplyToMonthBtn"),
+        shortcutsModal: document.getElementById("shortcutsModal"),
+        closeShortcutsBtn: document.getElementById("closeShortcutsBtn")
+      };
+
+      function esc(str) {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function uppercaseInputPreservingCursor(input) {
+        const upper = input.value.toUpperCase();
+        if (input.value === upper) return upper;
+        let s = null;
+        let en = null;
+        try {
+          s = input.selectionStart;
+          en = input.selectionEnd;
+        } catch (err) {}
+        input.value = upper;
+        try {
+          if (s !== null && en !== null) input.setSelectionRange(s, en);
+        } catch (err) {}
+        return upper;
+      }
+
+      /* ---------------- Zoom Controls ---------------- */
+      function syncStickyHeaderOffset() {
+        if (!el.headerRow || !el.filterRow) return;
+        const h = el.headerRow.getBoundingClientRect().height;
+        if (h > 0) {
+          el.filterRow.querySelectorAll("th").forEach((th) => {
+            th.style.top = `${h}px`;
+          });
+        }
+      }
+
+      function applyZoom(newZoom) {
+        const clamped = Math.max(0.7, Math.min(1.8, Math.round(newZoom * 10) / 10));
+        state.zoom = clamped;
+        document.documentElement.style.setProperty("--ui-scale", String(clamped));
+        const pct = Math.round(clamped * 100);
+        el.zoomResetBtn.textContent = `${pct}%`;
+        el.zoomOutBtn.disabled = clamped <= 0.7;
+        el.zoomInBtn.disabled = clamped >= 1.8;
+        try {
+          localStorage.setItem(ZOOM_STORAGE_KEY, String(clamped));
+        } catch (e) {}
+        requestAnimationFrame(() => {
+          syncStickyHeaderOffset();
+          if (acState.input) positionAcPopup(acState.input);
+          if (cfState.openKey && cfState.anchorBtn) positionColFilterPopup(cfState.anchorBtn);
+        });
+      }
+
+      el.zoomOutBtn.addEventListener("click", () => applyZoom(state.zoom - 0.1));
+      el.zoomInBtn.addEventListener("click", () => applyZoom(state.zoom + 0.1));
+      el.zoomResetBtn.addEventListener("click", () => applyZoom(1));
+
+      /* ---------------- Month / Year Switcher ---------------- */
+      function initMonthControls() {
+        el.monthSelect.innerHTML = MONTH_NAMES_FULL.map((name, idx) =>
+          `<option value="${idx}">${name}</option>`
+        ).join("");
+        syncMonthControlsUI();
+      }
+
+      function syncMonthControlsUI() {
+        const [y, m] = activeMonthKey.split("-").map(Number);
+        el.monthSelect.value = String(m - 1);
+        el.yearInput.value = String(y);
+        const titleText = `Flight Duty Roster — ${MONTH_NAMES_FULL[m - 1]} ${y}`;
+        el.rosterHeading.textContent = titleText;
+        document.title = titleText;
+      }
+
+      function resetAllFiltersOnly() {
+        state.globalSearch = "";
+        el.globalSearch.value = "";
+        for (const col of COLUMNS) {
+          state.filters[col.key].clear();
+        }
+        state.sortKey = null;
+        state.sortDir = 1;
+        state.page = 1;
+        updateSortIcons();
+        updateFilterButtonLabels();
+      }
+
+      function switchToMonth(year, monthIndex) {
+        if (isNaN(year) || year < 2020 || year > 2040) return;
+        const newKey = `${year}-${String(monthIndex + 1).padStart(2, "0")}`;
+        if (newKey === activeMonthKey) return;
+
+        rostersByMonth[activeMonthKey] = serializeRows(allRows, true);
+        activeMonthKey = newKey;
+
+        if (rostersByMonth[newKey]) {
+          allRows = hydrateRows(rostersByMonth[newKey]);
+        } else {
+          const generated = newKey === "2026-11"
+            ? buildNov2026ExactRows()
+            : generateMonthRows(year, monthIndex, weeklySchedule, 1);
+          allRows = generated;
+          rostersByMonth[newKey] = serializeRows(allRows, true);
+        }
+
+        nextUid = allRows.reduce((m, r) => Math.max(m, Number(r.id) || 0), 0) + 1;
+        nextGroupId = allRows.reduce((m, r) => Math.max(m, Number(r.flightGroupId) || 0), 0) + 1;
+        undoStack.length = 0;
+        redoStack.length = 0;
+        updateUndoButtons();
+
+        recomputeShadingAndStarts();
+        syncMonthControlsUI();
+        resetAllFiltersOnly();
+        closeColFilterPopup();
+        refreshFilterOptions();
+        scheduleSave();
+        render();
+      }
+
+      el.monthSelect.addEventListener("change", () => {
+        switchToMonth(Number(el.yearInput.value), Number(el.monthSelect.value));
+      });
+      el.yearInput.addEventListener("change", () => {
+        switchToMonth(Number(el.yearInput.value), Number(el.monthSelect.value));
+      });
+
+      /* ---------------- Undo / Redo Stack ---------------- */
+      const undoStack = [];
+      const redoStack = [];
+      const MAX_HISTORY = 30;
+
+      function updateUndoButtons() {
+        el.undoBtn.disabled = undoStack.length === 0;
+        el.redoBtn.disabled = redoStack.length === 0;
+      }
+
+      function pushUndoSnapshot() {
+        undoStack.push(JSON.stringify(serializeRows(allRows, true)));
+        if (undoStack.length > MAX_HISTORY) undoStack.shift();
+        redoStack.length = 0;
+        updateUndoButtons();
+      }
+
+      function performUndo() {
+        if (undoStack.length === 0) return;
+        redoStack.push(JSON.stringify(serializeRows(allRows, true)));
+        const prev = JSON.parse(undoStack.pop());
+        allRows = hydrateRows(prev);
+        nextUid = allRows.reduce((m, r) => Math.max(m, Number(r.id) || 0), 0) + 1;
+        nextGroupId = allRows.reduce((m, r) => Math.max(m, Number(r.flightGroupId) || 0), 0) + 1;
+        recomputeShadingAndStarts();
+        scheduleSave();
+        refreshFilterOptions();
+        updateUndoButtons();
+        render();
+      }
+
+      function performRedo() {
+        if (redoStack.length === 0) return;
+        undoStack.push(JSON.stringify(serializeRows(allRows, true)));
+        const next = JSON.parse(redoStack.pop());
+        allRows = hydrateRows(next);
+        nextUid = allRows.reduce((m, r) => Math.max(m, Number(r.id) || 0), 0) + 1;
+        nextGroupId = allRows.reduce((m, r) => Math.max(m, Number(r.flightGroupId) || 0), 0) + 1;
+        recomputeShadingAndStarts();
+        scheduleSave();
+        refreshFilterOptions();
+        updateUndoButtons();
+        render();
+      }
+
+      el.undoBtn.addEventListener("click", performUndo);
+      el.redoBtn.addEventListener("click", performRedo);
+
+      /* ---------------- Multi-Cell Selection & Excel Navigation ---------------- */
+      let isMouseClickFocus = false;
+
+      const gridState = {
+        activeInput: null,
+        editing: false,
+        originalValue: "",
+        snapshotTakenForCell: false,
+        statusNotice: ""
+      };
+
+      const selection = {
+        active: false,
+        startR: -1,
+        startC: -1,
+        endR: -1,
+        endC: -1,
+        dragging: false,
+        dragMoved: false
+      };
+
+      function getSelectionBounds() {
+        if (!selection.active || selection.startR < 0) return null;
+        const minR = Math.max(0, Math.min(selection.startR, selection.endR));
+        const maxR = Math.min(currentPageRows.length - 1, Math.max(selection.startR, selection.endR));
+        const minC = Math.max(0, Math.min(selection.startC, selection.endC));
+        const maxC = Math.min(COLUMNS.length - 1, Math.max(selection.startC, selection.endC));
+        if (maxR < minR || maxC < minC) return null;
+        const count = (maxR - minR + 1) * (maxC - minC + 1);
+        return { minR, maxR, minC, maxC, count };
+      }
+
+      function clearSelection() {
+        selection.active = false;
+        selection.startR = -1;
+        selection.startC = -1;
+        selection.endR = -1;
+        selection.endC = -1;
+        updateSelectionVisuals();
+      }
+
+      function setSingleSelection(r, c) {
+        selection.active = true;
+        selection.startR = r;
+        selection.startC = c;
+        selection.endR = r;
+        selection.endC = c;
+        updateSelectionVisuals();
+      }
+
+      function updateSelectionVisuals() {
+        const bounds = getSelectionBounds();
+        el.tableBody.querySelectorAll("td.cell-selected").forEach((td) => td.classList.remove("cell-selected"));
+
+        if (!bounds || state.viewMode === "cards") {
+          el.statSelected.textContent = "Selected: 0";
+          el.clearCellsBtn.disabled = true;
+          el.clearCellsBtn.textContent = "⌫ Clear Cells";
+          el.dupBelowBtn.disabled = true;
+          return;
+        }
+
+        if (bounds.count > 1) {
+          for (let r = bounds.minR; r <= bounds.maxR; r++) {
+            for (let c = bounds.minC; c <= bounds.maxC; c++) {
+              const inp = el.tableBody.querySelector(`input.cell-edit[data-r="${r}"][data-c="${c}"]`);
+              if (inp && inp.parentElement) {
+                const td = inp.closest("td");
+                if (td) td.classList.add("cell-selected");
+              }
+            }
+          }
+        }
+
+        const rowsCount = bounds.maxR - bounds.minR + 1;
+        const colsCount = bounds.maxC - bounds.minC + 1;
+        el.statSelected.textContent = bounds.count > 1
+          ? `Selected: ${bounds.count} (${rowsCount}×${colsCount})`
+          : "Selected: 1";
+
+        el.clearCellsBtn.disabled = false;
+        el.clearCellsBtn.textContent = bounds.count > 1
+          ? `⌫ Clear ${bounds.count} Cells`
+          : "⌫ Clear Cell";
+        el.dupBelowBtn.disabled = bounds.maxR >= currentPageRows.length - 1 && bounds.minR === bounds.maxR;
+      }
+
+      function flashStatusNotice(msg) {
+        gridState.statusNotice = msg;
+        el.activeCellInfo.textContent = msg;
+        setTimeout(() => {
+          if (gridState.statusNotice === msg) {
+            gridState.statusNotice = "";
+            updateStatusBar(gridState.activeInput);
+          }
+        }, 1800);
+      }
+
+      function updateStatusBar(input) {
+        if (gridState.statusNotice) return;
+        const bounds = getSelectionBounds();
+        if (!input) {
+          el.modePill.textContent = "READY";
+          el.modePill.classList.remove("edit");
+          el.activeCellInfo.textContent = bounds && bounds.count > 1
+            ? `${bounds.count} cells selected • Press Del to clear or Duplicate Below`
+            : "Click cell to edit at cursor • Double-click to select • F2 edit at end";
+          return;
+        }
+        const colIdx = Number(input.dataset.c);
+        const colLabel = input.dataset.editField
+          ? input.dataset.editField.toUpperCase()
+          : (COLUMNS[colIdx] ? COLUMNS[colIdx].label : "");
+        const rowNum = Number(input.dataset.r) + 1;
+        el.modePill.textContent = gridState.editing ? "EDIT" : "READY";
+        el.modePill.classList.toggle("edit", gridState.editing);
+        el.activeCellInfo.textContent = gridState.editing
+          ? `Editing ${colLabel} (Row ${rowNum}) • Auto-uppercase • Enter next row • Esc cancel`
+          : `${colLabel} (Row ${rowNum}) • F2 edit at end • Double-click select • Ctrl+D fill down`;
+      }
+
+      function setCellEditMode(input, editing, placeCaretAtEnd) {
+        if (!input) return;
+        if (gridState.activeInput && gridState.activeInput !== input) {
+          gridState.activeInput.classList.remove("is-editing");
+        }
+        gridState.activeInput = input;
+        gridState.editing = editing;
+        input.classList.toggle("is-editing", editing);
+
+        if (editing) {
+          if (!gridState.snapshotTakenForCell) {
+            gridState.originalValue = input.value;
+          }
+          if (placeCaretAtEnd) {
+            const len = input.value.length;
+            try {
+              input.setSelectionRange(len, len);
+            } catch (e) {}
+          }
+        }
+        updateStatusBar(input);
+      }
+
+      function ensureCellSnapshot() {
+        if (!gridState.snapshotTakenForCell) {
+          pushUndoSnapshot();
+          gridState.snapshotTakenForCell = true;
+        }
+      }
+
+      function focusGridCell(r, c, preserveSelectionRange) {
+        const clampedR = Math.max(0, Math.min(currentPageRows.length - 1, r));
+        const clampedC = Math.max(0, Math.min(COLUMNS.length - 1, c));
+        const target = el.tableBody.querySelector(`input.cell-edit[data-r="${clampedR}"][data-c="${clampedC}"]`);
+        if (!target) return false;
+        isMouseClickFocus = false;
+        target.focus();
+        setCellEditMode(target, false, false);
+        if (!preserveSelectionRange) {
+          setSingleSelection(clampedR, clampedC);
+        }
+        target.scrollIntoView({ block: "nearest", inline: "nearest" });
+        return true;
+      }
+
+      /* ---------------- Clear Selected Cells & Duplicate Cells Below ---------------- */
+      function clearSelectedCells() {
+        const bounds = getSelectionBounds();
+        if (!bounds) return;
+
+        let anyNonEmpty = false;
+        for (let r = bounds.minR; r <= bounds.maxR; r++) {
+          for (let c = bounds.minC; c <= bounds.maxC; c++) {
+            if (currentPageRows[r] && currentPageRows[r][COLUMNS[c].key] !== "") {
+              anyNonEmpty = true;
+              break;
+            }
+          }
+          if (anyNonEmpty) break;
+        }
+        if (!anyNonEmpty) return;
+
+        pushUndoSnapshot();
+        for (let r = bounds.minR; r <= bounds.maxR; r++) {
+          const row = currentPageRows[r];
+          if (!row) continue;
+          for (let c = bounds.minC; c <= bounds.maxC; c++) {
+            const key = COLUMNS[c].key;
+            row[key] = "";
+            const inp = el.tableBody.querySelector(`input.cell-edit[data-r="${r}"][data-c="${c}"]`);
+            if (inp) inp.value = "";
+          }
+        }
+        gridState.snapshotTakenForCell = true;
+        closeAcPopup();
+        scheduleSave();
+        commitRowFieldVisuals();
+        updateStatusBar(gridState.activeInput);
+      }
+
+      function duplicateCellsBelow(fromCtrlD) {
+        const bounds = getSelectionBounds();
+        if (!bounds) return;
+
+        if (bounds.maxR > bounds.minR) {
+          pushUndoSnapshot();
+          for (let c = bounds.minC; c <= bounds.maxC; c++) {
+            const key = COLUMNS[c].key;
+            const topVal = String(currentPageRows[bounds.minR][key]).toUpperCase();
+            for (let r = bounds.minR + 1; r <= bounds.maxR; r++) {
+              currentPageRows[r][key] = topVal;
+              const inp = el.tableBody.querySelector(`input.cell-edit[data-r="${r}"][data-c="${c}"]`);
+              if (inp) inp.value = topVal;
+            }
+          }
+          scheduleSave();
+          commitRowFieldVisuals();
+          return;
+        }
+
+        if (fromCtrlD) {
+          if (bounds.minR <= 0) return;
+          pushUndoSnapshot();
+          for (let c = bounds.minC; c <= bounds.maxC; c++) {
+            const key = COLUMNS[c].key;
+            const aboveVal = String(currentPageRows[bounds.minR - 1][key]).toUpperCase();
+            currentPageRows[bounds.minR][key] = aboveVal;
+            const inp = el.tableBody.querySelector(`input.cell-edit[data-r="${bounds.minR}"][data-c="${c}"]`);
+            if (inp) inp.value = aboveVal;
+          }
+          scheduleSave();
+          commitRowFieldVisuals();
+          focusGridCell(Math.min(currentPageRows.length - 1, bounds.minR + 1), bounds.minC);
+          return;
+        }
+
+        if (bounds.minR + 1 >= currentPageRows.length) return;
+        pushUndoSnapshot();
+        for (let c = bounds.minC; c <= bounds.maxC; c++) {
+          const key = COLUMNS[c].key;
+          const val = String(currentPageRows[bounds.minR][key]).toUpperCase();
+          currentPageRows[bounds.minR + 1][key] = val;
+          const inp = el.tableBody.querySelector(`input.cell-edit[data-r="${bounds.minR + 1}"][data-c="${c}"]`);
+          if (inp) inp.value = val;
+        }
+        scheduleSave();
+        commitRowFieldVisuals();
+        selection.startR = bounds.minR + 1;
+        selection.endR = bounds.minR + 1;
+        selection.startC = bounds.minC;
+        selection.endC = bounds.maxC;
+        const nextInp = el.tableBody.querySelector(`input.cell-edit[data-r="${bounds.minR + 1}"][data-c="${bounds.minC}"]`);
+        if (nextInp) {
+          isMouseClickFocus = false;
+          nextInp.focus();
+          setCellEditMode(nextInp, false, false);
+        }
+        updateSelectionVisuals();
+      }
+
+      function duplicateAboveInCard(input) {
+        const card = input.closest(".flight-card");
+        if (!card) return;
+        const r = Number(input.dataset.r);
+        const c = Number(input.dataset.c);
+        const field = input.dataset.editField;
+        if (isNaN(r) || r <= 0) return;
+
+        const aboveInp = card.querySelector(`input.cell-edit[data-r="${r - 1}"][data-c="${c}"]`);
+        if (!aboveInp) return;
+
+        pushUndoSnapshot();
+        const val = aboveInp.value.toUpperCase();
+        input.value = val;
+
+        const id = Number(input.dataset.editId);
+        const row = allRows.find((rw) => rw.id === id);
+        if (row) {
+          row[field] = val;
+        }
+
+        closeAcPopup();
+        scheduleSave();
+        commitRowFieldVisuals();
+
+        const nextInp = card.querySelector(`input.cell-edit[data-r="${r + 1}"][data-c="${c}"]`);
+        if (nextInp) {
+          isMouseClickFocus = false;
+          nextInp.focus();
+          setCellEditMode(nextInp, false, false);
+        } else {
+          setCellEditMode(input, false, false);
+        }
+      }
+
+      el.clearCellsBtn.addEventListener("click", clearSelectedCells);
+      el.dupBelowBtn.addEventListener("click", () => duplicateCellsBelow(false));
+      el.multiSelectBtn.addEventListener("click", () => {
+        state.multiSelectMode = !state.multiSelectMode;
+        el.multiSelectBtn.classList.toggle("btn-active", state.multiSelectMode);
+        el.multiSelectBtn.textContent = state.multiSelectMode ? "Multi-Select: ON" : "Multi-Select";
+      });
+
+      /* ---------------- Staff Autocomplete Logic ---------------- */
+      const acState = {
+        input: null,
+        matches: [],
+        activeIndex: 0,
+        userNavigated: false,
+        dismissedByEsc: false
+      };
+
+      let isPointerDownOnAcPopup = false;
+
+      function getStaffDictionary(excludeRowId) {
+        const set = new Set(DEFAULT_STAFF_NAMES);
+        for (const r of allRows) {
+          if (r.id === excludeRowId) continue;
+          const s = r.staff.trim().toUpperCase();
+          if (s.length >= 2) set.add(s);
+        }
+        for (const mKey of Object.keys(rostersByMonth)) {
+          if (mKey === activeMonthKey) continue;
+          const arr = rostersByMonth[mKey];
+          if (!Array.isArray(arr)) continue;
+          for (const item of arr) {
+            const s = item && item[7] ? String(item[7]).trim().toUpperCase() : "";
+            if (s.length >= 2) set.add(s);
+          }
+        }
+        return Array.from(set).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+      }
+
+      function findStaffMatches(query, allowEmpty, excludeRowId) {
+        const q = query.trim().toUpperCase();
+        if (!q && !allowEmpty) return [];
+        const dict = getStaffDictionary(excludeRowId);
+        if (!q) return dict;
+
+        const prefix = [];
+        const contains = [];
+        for (const name of dict) {
+          const upper = name.toUpperCase();
+          if (upper.startsWith(q)) {
+            prefix.push(name);
+          } else if (upper.includes(q)) {
+            contains.push(name);
+          }
+        }
+        return prefix.concat(contains);
+      }
+
+      function highlightMatch(name, query) {
+        const q = query.trim();
+        if (!q) return esc(name);
+        const idx = name.toUpperCase().indexOf(q.toUpperCase());
+        if (idx === -1) return esc(name);
+        const before = esc(name.slice(0, idx));
+        const mid = esc(name.slice(idx, idx + q.length));
+        const after = esc(name.slice(idx + q.length));
+        return `${before}<strong>${mid}</strong>${after}`;
+      }
+
+      function positionAcPopup(input) {
+        if (!input || !input.isConnected) {
+          closeAcPopup();
+          return;
+        }
+        const rect = input.getBoundingClientRect();
+        if (rect.bottom < 0 || rect.top > window.innerHeight) {
+          closeAcPopup();
+          return;
+        }
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        const popupHeight = Math.min(210, acState.matches.length * 32 + 10);
+        const minW = Math.max(195, rect.width);
+
+        el.staffAcPopup.style.minWidth = `${minW}px`;
+        el.staffAcPopup.style.left = `${Math.max(6, Math.min(rect.left, window.innerWidth - minW - 10))}px`;
+
+        if (spaceBelow < popupHeight && spaceAbove > spaceBelow) {
+          el.staffAcPopup.style.top = `${Math.max(6, rect.top - popupHeight - 4)}px`;
+        } else {
+          el.staffAcPopup.style.top = `${rect.bottom + 3}px`;
+        }
+      }
+
+      function renderAcPopup() {
+        if (!acState.input || acState.matches.length === 0) {
+          closeAcPopup();
+          return;
+        }
+        const query = acState.input.value;
+        el.staffAcPopup.innerHTML = acState.matches.map((name, i) => `
+          <div class="ac-item ${i === acState.activeIndex ? "active" : ""}" data-ac-idx="${i}" role="option" aria-selected="${i === acState.activeIndex}">
+            <span>${highlightMatch(name, query)}</span>
+            <span class="ac-tab-hint">Tab / Enter</span>
+          </div>
+        `).join("");
+        el.staffAcPopup.classList.add("open");
+        positionAcPopup(acState.input);
+
+        const activeEl = el.staffAcPopup.querySelector(".ac-item.active");
+        if (activeEl) {
+          const top = activeEl.offsetTop;
+          const bottom = top + activeEl.offsetHeight;
+          if (top < el.staffAcPopup.scrollTop) {
+            el.staffAcPopup.scrollTop = top;
+          } else if (bottom > el.staffAcPopup.scrollTop + el.staffAcPopup.clientHeight) {
+            el.staffAcPopup.scrollTop = bottom - el.staffAcPopup.clientHeight;
+          }
+        }
+      }
+
+      function openAcForInput(input, allowEmpty) {
+        const excludeId = Number(input.dataset.editId);
+        const matches = findStaffMatches(input.value, allowEmpty, excludeId);
+        if (
+          matches.length === 1 &&
+          input.value.trim().toUpperCase() === matches[0].toUpperCase()
+        ) {
+          closeAcPopup();
+          return;
+        }
+        if (matches.length === 0) {
+          closeAcPopup();
+          return;
+        }
+        acState.input = input;
+        acState.matches = matches;
+        acState.activeIndex = 0;
+        acState.userNavigated = false;
+        renderAcPopup();
+      }
+
+      function closeAcPopup() {
+        acState.input = null;
+        acState.matches = [];
+        acState.activeIndex = 0;
+        acState.userNavigated = false;
+        el.staffAcPopup.classList.remove("open");
+        el.staffAcPopup.innerHTML = "";
+      }
+
+      function acceptStaffValue(input, chosen) {
+        ensureCellSnapshot();
+        const val = String(chosen).toUpperCase();
+        input.value = val;
+        const id = Number(input.dataset.editId);
+        const row = allRows.find((r) => r.id === id);
+        if (row) {
+          row.staff = val;
+          scheduleSave();
+          updateStats(getFilteredRows());
+        }
+        closeAcPopup();
+        flashStatusNotice(`Autocompleted: ${val}`);
+      }
+
+      function acceptAcSuggestion(index) {
+        if (!acState.input || !acState.matches[index]) return false;
+        acceptStaffValue(acState.input, acState.matches[index]);
+        return true;
+      }
+
+      function tryAutocompleteStaffOnConfirm(input) {
+        if (acState.dismissedByEsc) return false;
+
+        const isOpen = el.staffAcPopup.classList.contains("open") && acState.input === input;
+        if (isOpen && acState.matches.length > 0 && acState.userNavigated) {
+          const chosen = acState.matches[acState.activeIndex];
+          if (chosen) {
+            acceptStaffValue(input, chosen);
+            return true;
+          }
+        }
+
+        const typed = input.value.trim();
+        if (!typed) return false;
+
+        const excludeId = Number(input.dataset.editId);
+        const matches = findStaffMatches(typed, false, excludeId);
+        if (matches.length > 0) {
+          const first = matches[0];
+          if (first !== typed) {
+            acceptStaffValue(input, first);
+            return true;
+          }
+        }
+        return false;
+      }
+
+      el.staffAcPopup.addEventListener("pointerdown", (e) => {
+        const item = e.target.closest("[data-ac-idx]");
+        if (!item) return;
+        isPointerDownOnAcPopup = true;
+        e.preventDefault();
+        const idx = Number(item.dataset.acIdx);
+        const targetInput = acState.input;
+        acceptAcSuggestion(idx);
+        if (targetInput) {
+          isMouseClickFocus = false;
+          targetInput.focus();
+          setCellEditMode(targetInput, false, false);
+        }
+        setTimeout(() => { isPointerDownOnAcPopup = false; }, 200);
+      });
+
+      el.tableScroll.addEventListener("scroll", () => {
+        if (acState.input) positionAcPopup(acState.input);
+      });
+      window.addEventListener("scroll", () => {
+        if (acState.input) positionAcPopup(acState.input);
+      });
+      window.addEventListener("resize", () => {
+        syncStickyHeaderOffset();
+        if (acState.input) positionAcPopup(acState.input);
+      });
+
+      /* ---------------- Multi-Value Cascading Column Filtering ---------------- */
+      function matchesFilters(row, excludeKey) {
+        const f = state.filters;
+        for (const col of COLUMNS) {
+          if (col.key === excludeKey) continue;
+          const fSet = f[col.key];
+          if (!fSet || fSet.size === 0) continue;
+          const rv = row[col.key];
+          const valKey = rv === "" ? "__BLANK__" : rv;
+          if (!fSet.has(valKey)) return false;
+        }
+        const q = state.globalSearch.trim().toLowerCase();
+        if (q) {
+          const hay = `${row.date} ${row.time} ${row.flight} ${row.sta} ${row.std} ${row.duty} ${row.staff} ${row.nature} ${row.coHrs}`.toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        return true;
+      }
+
+      function getCascadingOptions(colKey) {
+        const counts = new Map();
+        for (const r of allRows) {
+          if (!matchesFilters(r, colKey)) continue;
+          const v = r[colKey] === "" ? "__BLANK__" : r[colKey];
+          counts.set(v, (counts.get(v) || 0) + 1);
+        }
+        // Include any currently selected values even if 0 under other filters
+        const activeSet = state.filters[colKey];
+        if (activeSet) {
+          for (const v of activeSet) {
+            if (!counts.has(v)) counts.set(v, 0);
+          }
+        }
+
+        const hasBlank = counts.has("__BLANK__");
+        const vals = Array.from(counts.keys()).filter((k) => k !== "__BLANK__");
+        if (colKey !== "date") {
+          vals.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+        }
+
+        const items = [];
+        if (hasBlank) {
+          items.push({ value: "__BLANK__", label: "(Blank)", count: counts.get("__BLANK__") });
+        }
+        for (const v of vals) {
+          items.push({ value: v, label: v, count: counts.get(v) });
+        }
+        return items;
+      }
+
+      function formatFilterBtnText(colKey) {
+        const fSet = state.filters[colKey];
+        if (!fSet || fSet.size === 0) return "All";
+        const arr = Array.from(fSet).map((v) => (v === "__BLANK__" ? "(Blank)" : v));
+        if (arr.length === 1) return arr[0];
+        return `${arr[0]} (+${arr.length - 1})`;
+      }
+
+      function updateFilterButtonLabels() {
+        for (const col of COLUMNS) {
+          const fSet = state.filters[col.key];
+          const text = formatFilterBtnText(col.key);
+          const hasFilter = fSet && fSet.size > 0;
+          [document.getElementById(`tf_${col.key}`), document.getElementById(`mf_${col.key}`)].forEach((btn) => {
+            if (!btn) return;
+            const lbl = btn.querySelector(".ms-filter-label");
+            if (lbl) lbl.textContent = text;
+            btn.classList.toggle("has-filter", hasFilter);
+            btn.title = hasFilter ? Array.from(fSet).map((v) => (v === "__BLANK__" ? "(Blank)" : v)).join(", ") : "Filter " + col.label;
+          });
+        }
+      }
+
+      const cfState = {
+        openKey: null,
+        anchorBtn: null,
+        search: ""
+      };
+
+      function positionColFilterPopup(btn) {
+        if (!btn || !btn.isConnected) return;
+        const rect = btn.getBoundingClientRect();
+        const popW = Math.min(270, window.innerWidth - 16);
+        el.colFilterPopup.style.width = `${popW}px`;
+        const left = Math.max(8, Math.min(rect.left, window.innerWidth - popW - 8));
+        el.colFilterPopup.style.left = `${left}px`;
+
+        const estH = 340;
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        if (spaceBelow < estH && spaceAbove > spaceBelow) {
+          el.colFilterPopup.style.top = `${Math.max(8, rect.top - Math.min(estH, spaceAbove - 10))}px`;
+        } else {
+          el.colFilterPopup.style.top = `${Math.min(window.innerHeight - 180, rect.bottom + 4)}px`;
+        }
+      }
+
+      function renderColFilterPopupList() {
+        if (!cfState.openKey) return;
+        const colKey = cfState.openKey;
+        const colDef = COLUMNS.find((c) => c.key === colKey);
+        el.cfPopupTitle.textContent = `Filter: ${colDef ? colDef.label : colKey}`;
+
+        const items = getCascadingOptions(colKey);
+        const q = cfState.search.trim().toLowerCase();
+        const visibleItems = q
+          ? items.filter((it) => it.label.toLowerCase().includes(q))
+          : items;
+
+        const fSet = state.filters[colKey];
+        if (visibleItems.length === 0) {
+          el.cfList.innerHTML = `<div style="padding:12px;text-align:center;color:var(--muted);font-size:0.8rem;">No matching values</div>`;
+        } else {
+          el.cfList.innerHTML = visibleItems.map((it) => {
+            const checked = fSet.has(it.value);
+            return `
+              <label class="cf-item">
+                <span class="cf-item-left">
+                  <input type="checkbox" data-cf-val="${esc(it.value)}" ${checked ? "checked" : ""} />
+                  <span class="cf-item-text">${esc(it.label)}</span>
+                </span>
+                <span class="cf-item-count">${it.count.toLocaleString()}</span>
+              </label>
+            `;
+          }).join("");
+        }
+
+        el.cfStatus.textContent = fSet.size === 0
+          ? "Showing all"
+          : `${fSet.size} selected`;
+      }
+
+      function openColFilterPopup(colKey, btn) {
+        if (cfState.openKey === colKey && el.colFilterPopup.classList.contains("open")) {
+          closeColFilterPopup();
+          return;
+        }
+        cfState.openKey = colKey;
+        cfState.anchorBtn = btn;
+        cfState.search = "";
+        el.cfSearchInput.value = "";
+        el.colFilterPopup.classList.add("open");
+        renderColFilterPopupList();
+        positionColFilterPopup(btn);
+        el.cfSearchInput.focus();
+      }
+
+      function closeColFilterPopup() {
+        cfState.openKey = null;
+        cfState.anchorBtn = null;
+        cfState.search = "";
+        el.colFilterPopup.classList.remove("open");
+      }
+
+      el.cfCloseBtn.addEventListener("click", closeColFilterPopup);
+      el.cfDoneBtn.addEventListener("click", closeColFilterPopup);
+
+      el.cfSearchInput.addEventListener("input", () => {
+        cfState.search = el.cfSearchInput.value;
+        renderColFilterPopupList();
+      });
+
+      el.cfList.addEventListener("change", (e) => {
+        const cb = e.target.closest("input[data-cf-val]");
+        if (!cb || !cfState.openKey) return;
+        const val = cb.dataset.cfVal;
+        const fSet = state.filters[cfState.openKey];
+        if (cb.checked) {
+          fSet.add(val);
+        } else {
+          fSet.delete(val);
+        }
+        state.page = 1;
+        refreshFilterOptions();
+        render();
+      });
+
+      el.cfSelectMatchingBtn.addEventListener("click", () => {
+        if (!cfState.openKey) return;
+        const colKey = cfState.openKey;
+        const items = getCascadingOptions(colKey);
+        const q = cfState.search.trim().toLowerCase();
+        const visibleItems = q
+          ? items.filter((it) => it.label.toLowerCase().includes(q))
+          : items;
+        const fSet = state.filters[colKey];
+        for (const it of visibleItems) {
+          fSet.add(it.value);
+        }
+        state.page = 1;
+        refreshFilterOptions();
+        render();
+      });
+
+      el.cfClearColBtn.addEventListener("click", () => {
+        if (!cfState.openKey) return;
+        state.filters[cfState.openKey].clear();
+        state.page = 1;
+        refreshFilterOptions();
+        render();
+      });
+
+      document.addEventListener("pointerdown", (e) => {
+        if (!el.colFilterPopup.classList.contains("open")) return;
+        if (e.target.closest("#colFilterPopup") || e.target.closest(".ms-filter-btn")) return;
+        closeColFilterPopup();
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && el.colFilterPopup.classList.contains("open")) {
+          e.preventDefault();
+          closeColFilterPopup();
+        }
+      });
+
+      function refreshFilterOptions() {
+        updateFilterButtonLabels();
+        if (cfState.openKey && el.colFilterPopup.classList.contains("open")) {
+          renderColFilterPopupList();
+        }
+      }
+
+      function createFilterBtnHtml(col, prefix) {
+        return `<button type="button" class="ms-filter-btn" id="${prefix}_${col.key}" data-filter-col="${col.key}"><span class="ms-filter-label">All</span><span class="ms-filter-caret">▼</span></button>`;
+      }
+
+      function initHeadersAndFilters() {
+        el.headerRow.innerHTML = COLUMNS.map((col) => `
+          <th>
+            <button class="th-btn" type="button" data-sort="${col.key}">
+              <span>${esc(col.label)}</span>
+              <span class="sort-icon" data-sort-icon="${col.key}">↕</span>
+            </button>
+          </th>
+        `).join("") + `<th class="col-actions" style="width:94px;">Actions</th>`;
+
+        el.filterRow.innerHTML = COLUMNS.map((col) => `
+          <th>${createFilterBtnHtml(col, "tf")}</th>
+        `).join("") + `<th class="col-actions"></th>`;
+
+        el.mobileFilterPanel.innerHTML = `<div class="filter-grid">` + COLUMNS.map((col) => `
+          <div class="filter-field">
+            <label>${esc(col.label)}</label>
+            ${createFilterBtnHtml(col, "mf")}
+          </div>
+        `).join("") + `</div>`;
+
+        refreshFilterOptions();
+
+        el.headerRow.addEventListener("click", (e) => {
+          const btn = e.target.closest("[data-sort]");
+          if (!btn) return;
+          const key = btn.dataset.sort;
+          if (state.sortKey === key) {
+            if (state.sortDir === 1) {
+              state.sortDir = -1;
+            } else {
+              state.sortKey = null;
+              state.sortDir = 1;
+            }
+          } else {
+            state.sortKey = key;
+            state.sortDir = 1;
+          }
+          state.page = 1;
+          updateSortIcons();
+          render();
+        });
+
+        function handleFilterBtnClick(e) {
+          const btn = e.target.closest("[data-filter-col]");
+          if (!btn) return;
+          e.stopPropagation();
+          openColFilterPopup(btn.dataset.filterCol, btn);
+        }
+
+        el.filterRow.addEventListener("click", handleFilterBtnClick);
+        el.mobileFilterPanel.addEventListener("click", handleFilterBtnClick);
+      }
+
+      function updateSortIcons() {
+        document.querySelectorAll("[data-sort-icon]").forEach((icon) => {
+          const k = icon.dataset.sortIcon;
+          if (state.sortKey === k) {
+            icon.textContent = state.sortDir === 1 ? "▲" : "▼";
+            icon.style.opacity = "1";
+          } else {
+            icon.textContent = "↕";
+            icon.style.opacity = "0.7";
+          }
+        });
+      }
+
+      function getFilteredRows() {
+        const out = [];
+        for (const r of allRows) {
+          if (matchesFilters(r, null)) out.push(r);
+        }
+        if (state.sortKey) {
+          const key = state.sortKey;
+          const dir = state.sortDir;
+          out.sort((a, b) => {
+            const cmp = a[key].localeCompare(b[key], undefined, { numeric: true });
+            return cmp !== 0 ? cmp * dir : a.id - b.id;
+          });
+        }
+        return out;
+      }
+
+      function groupRowsIntoFlights(rows) {
+        const map = new Map();
+        for (const r of rows) {
+          const k = flightBlockKey(r);
+          let grp = map.get(k);
+          if (!grp) {
+            grp = { key: k, head: r, rows: [] };
+            map.set(k, grp);
+          }
+          grp.rows.push(r);
+        }
+        return Array.from(map.values());
+      }
+
+      function formatHrs(num) {
+        return Number.isInteger(num) ? String(num) : num.toFixed(1);
+      }
+
+      function sumCoHrs(rows) {
+        let s = 0;
+        for (const r of rows) {
+          const n = parseFloat(r.coHrs);
+          if (!isNaN(n)) s += n;
+        }
+        return s;
+      }
+
+      function renderActiveChips() {
+        const chips = [];
+        if (state.globalSearch.trim()) {
+          chips.push({ key: "__GLOBAL__", val: "", label: `Search: "${state.globalSearch.trim()}"` });
+        }
+        for (const col of COLUMNS) {
+          const fSet = state.filters[col.key];
+          if (!fSet || fSet.size === 0) continue;
+          if (fSet.size <= 4) {
+            for (const v of fSet) {
+              chips.push({
+                key: col.key,
+                val: v,
+                label: `${col.label}: ${v === "__BLANK__" ? "(Blank)" : v}`
+              });
+            }
+          } else {
+            chips.push({
+              key: col.key,
+              val: "__ALL_COL__",
+              label: `${col.label}: ${fSet.size} selected`
+            });
+          }
+        }
+        if (chips.length === 0) {
+          el.activeFilters.classList.remove("visible");
+          el.activeFilters.innerHTML = "";
+          return;
+        }
+        el.activeFilters.classList.add("visible");
+        el.activeFilters.innerHTML =
+          `<span style="color:var(--muted);font-weight:700;">Active Filters:</span>` +
+          chips.map((c) => `
+            <span class="chip">
+              ${esc(c.label)}
+              <button type="button" data-clear-chip="${esc(c.key)}" data-clear-val="${esc(c.val)}" aria-label="Remove filter">×</button>
+            </span>
+          `).join("");
+      }
+
+      function updateSubtotalsUI(filtered, pageRows) {
+        const totalCo = sumCoHrs(filtered);
+        const pageCo = sumCoHrs(pageRows);
+        const isPartialPage = pageRows.length < filtered.length;
+
+        if (state.viewMode === "cards") {
+          el.tableFoot.innerHTML = "";
+          if (filtered.length > 0) {
+            el.cardsSubtotal.classList.add("active");
+            el.cardsSubtotal.innerHTML = isPartialPage
+              ? `<span>SUBTOTAL CO HRS (This Page: ${formatHrs(pageCo)} hrs)</span><span>TOTAL CO HRS (All Filtered: ${formatHrs(totalCo)} hrs)</span>`
+              : `<span>SUBTOTAL CO HRS</span><span>${formatHrs(totalCo)} hrs</span>`;
+          } else {
+            el.cardsSubtotal.classList.remove("active");
+            el.cardsSubtotal.innerHTML = "";
+          }
+        } else {
+          el.cardsSubtotal.classList.remove("active");
+          el.cardsSubtotal.innerHTML = "";
+          if (filtered.length === 0) {
+            el.tableFoot.innerHTML = "";
+          } else {
+            const coText = isPartialPage
+              ? `${formatHrs(pageCo)} (All: ${formatHrs(totalCo)})`
+              : formatHrs(totalCo);
+            const labelText = isPartialPage
+              ? `SUBTOTAL CO HRS (Page: ${pageRows.length} rows | All Filtered: ${filtered.length} rows)`
+              : `SUBTOTAL CO HRS (${filtered.length.toLocaleString()} rows)`;
+            el.tableFoot.innerHTML = `
+              <tr>
+                <td colspan="8" style="text-align:right;">${esc(labelText)}</td>
+                <td>${esc(coText)}</td>
+                <td class="col-actions">hrs</td>
+              </tr>
+            `;
+          }
+        }
+      }
+
+      function updateStats(filtered) {
+        const flightKeys = new Set();
+        let assigned = 0;
+
+        for (const r of filtered) {
+          flightKeys.add(flightBlockKey(r));
+          if (r.staff.trim() !== "") assigned++;
+        }
+
+        const coSum = sumCoHrs(filtered);
+        const unassigned = filtered.length - assigned;
+        el.statRows.textContent = `${filtered.length.toLocaleString()} / ${allRows.length.toLocaleString()} rows`;
+        el.statFlights.textContent = `${flightKeys.size.toLocaleString()} flights`;
+        el.statAssigned.textContent = `Assigned Staff: ${assigned.toLocaleString()}`;
+        el.statUnassigned.textContent = `Unassigned: ${unassigned.toLocaleString()}`;
+        el.statCoSum.textContent = `SUBTOTAL CO HRS: ${formatHrs(coSum)}`;
+        el.resetDataBtn.style.display = hasCustomChanges ? "inline-flex" : "none";
+        updateSubtotalsUI(filtered, currentPageRows);
+      }
+
+      function statusClassForValue(key, val) {
+        if (key !== "sta" && key !== "std") return "";
+        if (val === "CANCELLED") return "status-cancelled";
+        if (val === "SUSPENDED") return "status-suspended";
+        return "";
+      }
+
+      function flightActionButtonsHtml(row) {
+        const isC = row.sta === "CANCELLED" && row.std === "CANCELLED";
+        const isS = row.sta === "SUSPENDED" && row.std === "SUSPENDED";
+        return `<span class="flight-mini-btns">
+          <button tabindex="-1" class="f-btn f-x" type="button" data-action="delete-flight" data-row-id="${row.id}" title="Delete entire flight">X</button>
+          <button tabindex="-1" class="f-btn f-c ${isC ? "active-c" : ""}" type="button" data-action="cancel-flight" data-row-id="${row.id}" title="${isC ? "Uncancel & restore original rows" : "Mark CANCELLED (1 row)"}">C</button>
+          <button tabindex="-1" class="f-btn f-s ${isS ? "active-s" : ""}" type="button" data-action="suspend-flight" data-row-id="${row.id}" title="${isS ? "Unsuspend & restore original rows" : "Mark SUSPENDED (1 row)"}">S</button>
+        </span>`;
+      }
+
+      let currentPageRows = [];
+
+      function render() {
+        closeAcPopup();
+        gridState.activeInput = null;
+        gridState.editing = false;
+        gridState.snapshotTakenForCell = false;
+        clearSelection();
+        updateStatusBar(null);
+
+        const filtered = getFilteredRows();
+        const total = filtered.length;
+        renderActiveChips();
+
+        const isCards = state.viewMode === "cards";
+        el.tableCard.classList.toggle("hidden", isCards);
+        el.cardsWrap.classList.toggle("active", isCards);
+        el.toggleViewBtn.textContent = isCards ? "Table View" : "Card View";
+        el.mobileFilterPanel.classList.toggle("open", state.filtersOpen);
+        el.toggleFiltersBtn.textContent = state.filtersOpen ? "Hide Filters" : "Filters";
+        el.pageSizeLabel.textContent = isCards ? "Scale:" : "Rows/page:";
+
+        if (isCards) {
+          el.tableBody.innerHTML = "";
+          const flightGroups = groupRowsIntoFlights(filtered);
+          const totalFlights = flightGroups.length;
+          const flightsPerPage = state.pageSize === "all"
+            ? Math.max(1, totalFlights)
+            : Math.max(10, Math.round(Number(state.pageSize) / 10));
+          const totalPages = Math.max(1, Math.ceil(totalFlights / flightsPerPage));
+          if (state.page > totalPages) state.page = totalPages;
+
+          const start = totalFlights === 0 ? 0 : (state.page - 1) * flightsPerPage;
+          const end = state.pageSize === "all" ? totalFlights : Math.min(totalFlights, start + flightsPerPage);
+          const pageGroups = flightGroups.slice(start, end);
+          currentPageRows = pageGroups.flatMap((g) => g.rows);
+
+          el.pagerInfo.textContent = totalFlights === 0
+            ? "Showing 0 flights"
+            : `Showing ${(start + 1).toLocaleString()}–${end.toLocaleString()} of ${totalFlights.toLocaleString()} flights (${total.toLocaleString()} duties)`;
+          el.pageLabel.textContent = `Page ${state.page} / ${totalPages}`;
+          el.prevPageBtn.disabled = state.page <= 1;
+          el.nextPageBtn.disabled = state.page >= totalPages;
+
+          if (pageGroups.length === 0) {
+            el.cardsWrap.innerHTML = `<div class="empty-state" style="grid-column:1/-1;background:#fff;border:1px solid #000;border-radius:var(--radius);">No matching flights found. Try clearing one or more filters.</div>`;
+          } else {
+            el.cardsWrap.innerHTML = pageGroups.map((grp) => {
+              const head = grp.head;
+              const rowIdsStr = grp.rows.map((r) => r.id).join(",");
+              return `
+                <article class="flight-card ${head.shaded ? "shaded" : ""}" data-flight-key="${esc(grp.key)}">
+                  <div class="fc-top">
+                    <div class="fc-title">
+                      <input class="fc-flight-inp" type="text" autocomplete="off" autocapitalize="characters" enterkeyhint="next" value="${esc(head.flight)}" data-card-meta-field="flight" data-card-row-ids="${rowIdsStr}" aria-label="Flight" />
+                      <span class="fc-count">${grp.rows.length}</span>
+                    </div>
+                    ${flightActionButtonsHtml(head)}
+                  </div>
+                  <div class="fc-meta-strip">
+                    ${CARD_META_COLS.map((mc) => `
+                      <div class="fc-meta-cell">
+                        <input class="${statusClassForValue(mc.key, head[mc.key])}" type="text" autocomplete="off" autocapitalize="characters" enterkeyhint="next" value="${esc(head[mc.key])}" title="${esc(mc.label)}" data-card-meta-field="${mc.key}" data-card-row-ids="${rowIdsStr}" aria-label="${esc(mc.label)}" />
+                      </div>
+                    `).join("")}
+                  </div>
+                  <table class="fc-table">
+                    <colgroup>
+                      <col style="width:33%;" />
+                      <col style="width:31%;" />
+                      <col style="width:11%;" />
+                      <col style="width:10%;" />
+                      <col style="width:15%;" />
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th>Duty</th>
+                        <th>Staff</th>
+                        <th>Nat</th>
+                        <th>CO</th>
+                        <th>±</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${grp.rows.map((r, localIdx) => `
+                        <tr data-row-id="${r.id}">
+                          ${CARD_DUTY_COLS.map((dc, dcIdx) => `
+                            <td><input class="cell-edit" type="text" autocomplete="off" autocapitalize="characters" enterkeyhint="next" value="${esc(r[dc.key])}" data-edit-id="${r.id}" data-edit-field="${dc.key}" data-r="${localIdx}" data-c="${dcIdx}" aria-label="${esc(dc.label)}" /></td>
+                          `).join("")}
+                          <td>
+                            <div class="row-actions">
+                              <button tabindex="-1" class="act-btn" type="button" data-action="insert-below" data-row-id="${r.id}" title="Insert row below">+</button>
+                              <button tabindex="-1" class="act-btn del" type="button" data-action="delete" data-row-id="${r.id}" title="Delete row">×</button>
+                            </div>
+                          </td>
+                        </tr>
+                      `).join("")}
+                    </tbody>
+                  </table>
+                </article>
+              `;
+            }).join("");
+          }
+        } else {
+          el.cardsWrap.innerHTML = "";
+          const pageSize = state.pageSize === "all" ? Math.max(1, total) : Number(state.pageSize);
+          const totalPages = Math.max(1, Math.ceil(total / pageSize));
+          if (state.page > totalPages) state.page = totalPages;
+
+          const start = total === 0 ? 0 : (state.page - 1) * pageSize;
+          const end = state.pageSize === "all" ? total : Math.min(total, start + pageSize);
+          const pageRows = filtered.slice(start, end);
+          currentPageRows = pageRows;
+
+          el.pagerInfo.textContent = total === 0
+            ? "Showing 0 of 0"
+            : `Showing ${(start + 1).toLocaleString()}–${end.toLocaleString()} of ${total.toLocaleString()}`;
+          el.pageLabel.textContent = `Page ${state.page} / ${totalPages}`;
+          el.prevPageBtn.disabled = state.page <= 1;
+          el.nextPageBtn.disabled = state.page >= totalPages;
+
+          if (pageRows.length === 0) {
+            el.tableBody.innerHTML = "";
+            el.tableEmpty.style.display = "block";
+          } else {
+            el.tableEmpty.style.display = "none";
+            el.tableBody.innerHTML = pageRows.map((r, rIdx) => `
+              <tr class="${r.shaded ? "shaded" : ""}" data-row-id="${r.id}">
+                ${COLUMNS.map((c, cIdx) => {
+                  const sCls = statusClassForValue(c.key, r[c.key]);
+                  const inputHtml = `<input class="cell-edit ${c.cls} ${sCls}" type="text" autocomplete="off" autocapitalize="characters" enterkeyhint="next" value="${esc(r[c.key])}" data-edit-id="${r.id}" data-edit-field="${c.key}" data-r="${rIdx}" data-c="${cIdx}" aria-label="${esc(c.label)}" />`;
+                  if (c.key === "flight" && r.isFlightStart) {
+                    return `<td><div class="flight-cell-wrap">${inputHtml}${flightActionButtonsHtml(r)}</div></td>`;
+                  }
+                  return `<td>${inputHtml}</td>`;
+                }).join("")}
+                <td class="col-actions">
+                  <div class="row-actions">
+                    <button tabindex="-1" class="act-btn" type="button" data-action="insert-above" data-row-id="${r.id}" title="Insert row above">↑+</button>
+                    <button tabindex="-1" class="act-btn" type="button" data-action="insert-below" data-row-id="${r.id}" title="Insert row below">↓+</button>
+                    <button tabindex="-1" class="act-btn del" type="button" data-action="delete" data-row-id="${r.id}" title="Delete row">×</button>
+                  </div>
+                </td>
+              </tr>
+            `).join("");
+          }
+        }
+
+        updateStats(filtered);
+        requestAnimationFrame(syncStickyHeaderOffset);
+      }
+
+      /* ---------------- Cell Input, Selection, Excel Keys & Paste ---------------- */
+      function commitRowFieldVisuals() {
+        recomputeShadingAndStarts();
+        refreshFilterOptions();
+        updateStats(getFilteredRows());
+        document.querySelectorAll("[data-row-id]").forEach((node) => {
+          const rid = Number(node.dataset.rowId);
+          const row = allRows.find((r) => r.id === rid);
+          if (row) node.classList.toggle("shaded", row.shaded);
+        });
+      }
+
+      el.tableBody.addEventListener("mousedown", (e) => {
+        if (e.target.closest("[data-action]")) return;
+        const input = e.target.closest("input.cell-edit");
+        if (!input) return;
+
+        const r = Number(input.dataset.r);
+        const c = Number(input.dataset.c);
+
+        if ((e.shiftKey || state.multiSelectMode) && selection.active) {
+          e.preventDefault();
+          isMouseClickFocus = false;
+          selection.endR = r;
+          selection.endC = c;
+          input.focus();
+          setCellEditMode(input, false, false);
+          updateSelectionVisuals();
+          updateStatusBar(input);
+          return;
+        }
+
+        isMouseClickFocus = true;
+        if (document.activeElement === input) {
+          setCellEditMode(input, true, false);
+        }
+
+        selection.dragging = true;
+        selection.dragMoved = false;
+        selection.active = true;
+        selection.startR = r;
+        selection.startC = c;
+        selection.endR = r;
+        selection.endC = c;
+        updateSelectionVisuals();
+      });
+
+      el.cardsWrap.addEventListener("mousedown", (e) => {
+        if (e.target.closest("[data-action]")) return;
+        const input = e.target.closest("input.cell-edit");
+        if (!input) return;
+        isMouseClickFocus = true;
+        if (document.activeElement === input) {
+          setCellEditMode(input, true, false);
+        }
+      });
+
+      window.addEventListener("mousemove", (e) => {
+        if (!selection.dragging) return;
+        const hovered = document.elementFromPoint(e.clientX, e.clientY);
+        if (!hovered) return;
+        const input = hovered.closest("input.cell-edit");
+        if (!input || !el.tableBody.contains(input)) return;
+        const r = Number(input.dataset.r);
+        const c = Number(input.dataset.c);
+        if (r !== selection.startR || c !== selection.startC) {
+          selection.dragMoved = true;
+          const sel = window.getSelection();
+          if (sel && sel.removeAllRanges) sel.removeAllRanges();
+        }
+        if (r !== selection.endR || c !== selection.endC) {
+          selection.endR = r;
+          selection.endC = c;
+          updateSelectionVisuals();
+          updateStatusBar(gridState.activeInput);
+        }
+      });
+
+      window.addEventListener("mouseup", () => {
+        isMouseClickFocus = false;
+        if (!selection.dragging) return;
+        selection.dragging = false;
+        if (selection.dragMoved) {
+          const sel = window.getSelection();
+          if (sel && sel.removeAllRanges) sel.removeAllRanges();
+          if (gridState.activeInput) setCellEditMode(gridState.activeInput, false, false);
+        }
+        selection.dragMoved = false;
+      });
+
+      let cardMetaSnapshotTaken = false;
+      el.cardsWrap.addEventListener("focusin", (e) => {
+        if (e.target.closest("[data-card-meta-field]")) {
+          cardMetaSnapshotTaken = false;
+        }
+      });
+
+      function handleCardMetaInput(metaInput, isComposing) {
+        if (!cardMetaSnapshotTaken) {
+          pushUndoSnapshot();
+          cardMetaSnapshotTaken = true;
+        }
+        const val = isComposing ? metaInput.value : uppercaseInputPreservingCursor(metaInput);
+        const field = metaInput.dataset.cardMetaField;
+        const ids = metaInput.dataset.cardRowIds.split(",").map(Number);
+        for (const id of ids) {
+          const row = allRows.find((r) => r.id === id);
+          if (row) row[field] = val;
+        }
+        scheduleSave();
+      }
+
+      el.cardsWrap.addEventListener("input", (e) => {
+        const metaInput = e.target.closest("[data-card-meta-field]");
+        if (!metaInput) return;
+        handleCardMetaInput(metaInput, e.isComposing);
+      });
+
+      el.cardsWrap.addEventListener("compositionend", (e) => {
+        const metaInput = e.target.closest("[data-card-meta-field]");
+        if (!metaInput) return;
+        handleCardMetaInput(metaInput, false);
+      });
+
+      el.cardsWrap.addEventListener("change", (e) => {
+        const metaInput = e.target.closest("[data-card-meta-field]");
+        if (metaInput) {
+          handleCardMetaInput(metaInput, false);
+          commitRowFieldVisuals();
+        }
+      });
+
+      function setupCellContainerEvents(container, isTable) {
+        container.addEventListener("focusin", (e) => {
+          const input = e.target.closest("[data-edit-id]");
+          if (!input) return;
+          const arrivedByMouse = isMouseClickFocus;
+          isMouseClickFocus = false;
+          gridState.activeInput = input;
+          gridState.originalValue = input.value;
+          gridState.snapshotTakenForCell = false;
+          acState.dismissedByEsc = false;
+
+          setCellEditMode(input, arrivedByMouse, false);
+
+          if (isTable && !selection.dragging && !state.multiSelectMode) {
+            const bounds = getSelectionBounds();
+            if (!bounds || bounds.count <= 1) {
+              setSingleSelection(Number(input.dataset.r), Number(input.dataset.c));
+            }
+          }
+          updateStatusBar(input);
+        });
+
+        container.addEventListener("focusout", (e) => {
+          const input = e.target.closest("[data-edit-id]");
+          if (!input) return;
+          input.classList.remove("is-editing");
+
+          const upper = input.value.toUpperCase();
+          if (input.value !== upper) {
+            input.value = upper;
+            const id = Number(input.dataset.editId);
+            const row = allRows.find((r) => r.id === id);
+            if (row) {
+              row[input.dataset.editField] = upper;
+              scheduleSave();
+            }
+          }
+
+          const nextTarget = e.relatedTarget;
+          const movingToPopup = isPointerDownOnAcPopup || (nextTarget && el.staffAcPopup.contains(nextTarget));
+          const movingToActionBtn = nextTarget && nextTarget.closest("button");
+
+          if (
+            input.dataset.editField === "staff" &&
+            !movingToPopup &&
+            !movingToActionBtn &&
+            !acState.dismissedByEsc
+          ) {
+            if (tryAutocompleteStaffOnConfirm(input)) {
+              commitRowFieldVisuals();
+            }
+          }
+
+          if (input.dataset.editField === "staff") {
+            setTimeout(() => {
+              if (document.activeElement !== acState.input) closeAcPopup();
+            }, 140);
+          }
+          setTimeout(() => {
+            if (!document.activeElement || !document.activeElement.closest("[data-edit-id]")) {
+              gridState.activeInput = null;
+              gridState.editing = false;
+              updateStatusBar(null);
+            }
+          }, 20);
+        });
+
+        container.addEventListener("dblclick", (e) => {
+          const input = e.target.closest("[data-edit-id]");
+          if (!input) return;
+          if (isTable) setSingleSelection(Number(input.dataset.r), Number(input.dataset.c));
+          setCellEditMode(input, true, false);
+          input.select();
+        });
+
+        function handleStaffOrCellInput(input, isComposing) {
+          ensureCellSnapshot();
+          setCellEditMode(input, true, false);
+          acState.dismissedByEsc = false;
+
+          const val = isComposing ? input.value : uppercaseInputPreservingCursor(input);
+          const id = Number(input.dataset.editId);
+          const field = input.dataset.editField;
+          const row = allRows.find((r) => r.id === id);
+          if (row) {
+            row[field] = val;
+            scheduleSave();
+            if (field === "coHrs") {
+              updateStats(getFilteredRows());
+            }
+          }
+          if (field === "staff") {
+            openAcForInput(input, false);
+          }
+        }
+
+        container.addEventListener("input", (e) => {
+          const input = e.target.closest("[data-edit-id]");
+          if (!input) return;
+          handleStaffOrCellInput(input, e.isComposing);
+        });
+
+        container.addEventListener("compositionend", (e) => {
+          const input = e.target.closest("[data-edit-id]");
+          if (!input) return;
+          handleStaffOrCellInput(input, false);
+        });
+
+        container.addEventListener("change", (e) => {
+          const input = e.target.closest("[data-edit-id]");
+          if (!input) return;
+          const upper = uppercaseInputPreservingCursor(input);
+          const id = Number(input.dataset.editId);
+          const row = allRows.find((r) => r.id === id);
+          if (row) row[input.dataset.editField] = upper;
+          commitRowFieldVisuals();
+        });
+
+        container.addEventListener("keydown", (e) => {
+          const input = e.target.closest("[data-edit-id]");
+          if (!input) return;
+
+          const r = Number(input.dataset.r);
+          const c = Number(input.dataset.c);
+          const field = input.dataset.editField;
+          const isStaff = field === "staff";
+          const isAcOpen = isStaff && el.staffAcPopup.classList.contains("open") && acState.input === input;
+
+          if (e.key === "F2") {
+            e.preventDefault();
+            setCellEditMode(input, true, true);
+            return;
+          }
+
+          if (e.key === "Escape") {
+            e.preventDefault();
+            if (isAcOpen) {
+              acState.dismissedByEsc = true;
+              closeAcPopup();
+              return;
+            }
+            if (gridState.editing) {
+              input.value = gridState.originalValue;
+              const id = Number(input.dataset.editId);
+              const row = allRows.find((rw) => rw.id === id);
+              if (row) {
+                row[field] = gridState.originalValue;
+                scheduleSave();
+                commitRowFieldVisuals();
+              }
+              setCellEditMode(input, false, false);
+            }
+            return;
+          }
+
+          if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "d") {
+            e.preventDefault();
+            e.stopPropagation();
+            if (isTable) {
+              duplicateCellsBelow(true);
+            } else {
+              duplicateAboveInCard(input);
+            }
+            return;
+          }
+
+          if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "c" && !gridState.editing) {
+            const bounds = getSelectionBounds();
+            if (isTable && bounds && bounds.count > 1) {
+              const lines = [];
+              for (let rr = bounds.minR; rr <= bounds.maxR; rr++) {
+                const rowVals = [];
+                for (let cc = bounds.minC; cc <= bounds.maxC; cc++) {
+                  rowVals.push(currentPageRows[rr][COLUMNS[cc].key]);
+                }
+                lines.push(rowVals.join("\t"));
+              }
+              if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(lines.join("\n")).catch(() => {});
+                flashStatusNotice(`Copied ${bounds.count} cells to clipboard`);
+              }
+            } else if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(input.value).catch(() => {});
+              flashStatusNotice(`Copied "${input.value}" to clipboard`);
+            }
+            return;
+          }
+
+          if (e.key === "Tab" || e.keyCode === 9) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (isStaff) {
+              tryAutocompleteStaffOnConfirm(input);
+              commitRowFieldVisuals();
+            }
+            setCellEditMode(input, false, false);
+            if (isTable) {
+              const nextC = e.shiftKey ? c - 1 : c + 1;
+              if (nextC >= 0 && nextC < COLUMNS.length) {
+                focusGridCell(r, nextC);
+              } else if (!e.shiftKey && r + 1 < currentPageRows.length) {
+                focusGridCell(r + 1, 0);
+              } else if (e.shiftKey && r - 1 >= 0) {
+                focusGridCell(r - 1, COLUMNS.length - 1);
+              }
+            } else {
+              const card = input.closest(".flight-card");
+              const nextC = e.shiftKey ? c - 1 : c + 1;
+              const nextInCard = card ? card.querySelector(`input.cell-edit[data-r="${r}"][data-c="${nextC}"]`) : null;
+              if (nextInCard) {
+                isMouseClickFocus = false;
+                nextInCard.focus();
+                setCellEditMode(nextInCard, false, false);
+              } else if (!e.shiftKey && card) {
+                const nextRowInp = card.querySelector(`input.cell-edit[data-r="${r + 1}"][data-c="0"]`);
+                if (nextRowInp) {
+                  isMouseClickFocus = false;
+                  nextRowInp.focus();
+                  setCellEditMode(nextRowInp, false, false);
+                }
+              } else if (e.shiftKey && card && r - 1 >= 0) {
+                const prevRowInp = card.querySelector(`input.cell-edit[data-r="${r - 1}"][data-c="${CARD_DUTY_COLS.length - 1}"]`);
+                if (prevRowInp) {
+                  isMouseClickFocus = false;
+                  prevRowInp.focus();
+                  setCellEditMode(prevRowInp, false, false);
+                }
+              }
+            }
+            return;
+          }
+
+          if (e.key === "Enter" || e.keyCode === 13) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (isStaff) {
+              tryAutocompleteStaffOnConfirm(input);
+            }
+            commitRowFieldVisuals();
+            setCellEditMode(input, false, false);
+            if (isTable) {
+              const nextR = e.shiftKey ? r - 1 : r + 1;
+              if (nextR >= 0 && nextR < currentPageRows.length) {
+                focusGridCell(nextR, c);
+              }
+            } else {
+              const card = input.closest(".flight-card");
+              const nextR = e.shiftKey ? r - 1 : r + 1;
+              const nextInCard = card ? card.querySelector(`input.cell-edit[data-r="${nextR}"][data-c="${c}"]`) : null;
+              if (nextInCard) {
+                isMouseClickFocus = false;
+                nextInCard.focus();
+                setCellEditMode(nextInCard, false, false);
+              } else if (!e.shiftKey && card && card.nextElementSibling) {
+                const nextCardFirst = card.nextElementSibling.querySelector(`input.cell-edit[data-r="0"][data-c="${c}"]`);
+                if (nextCardFirst) {
+                  isMouseClickFocus = false;
+                  nextCardFirst.focus();
+                  setCellEditMode(nextCardFirst, false, false);
+                }
+              }
+            }
+            return;
+          }
+
+          if (isTable && !gridState.editing && e.shiftKey && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+            e.preventDefault();
+            if (!selection.active) setSingleSelection(r, c);
+            if (e.key === "ArrowDown") selection.endR = Math.min(currentPageRows.length - 1, selection.endR + 1);
+            if (e.key === "ArrowUp") selection.endR = Math.max(0, selection.endR - 1);
+            if (e.key === "ArrowRight") selection.endC = Math.min(COLUMNS.length - 1, selection.endC + 1);
+            if (e.key === "ArrowLeft") selection.endC = Math.max(0, selection.endC - 1);
+            updateSelectionVisuals();
+            updateStatusBar(input);
+            const edgeInp = el.tableBody.querySelector(`input.cell-edit[data-r="${selection.endR}"][data-c="${selection.endC}"]`);
+            if (edgeInp) edgeInp.scrollIntoView({ block: "nearest", inline: "nearest" });
+            return;
+          }
+
+          if (e.key === "ArrowDown") {
+            if (isAcOpen) {
+              e.preventDefault();
+              acState.activeIndex = (acState.activeIndex + 1) % acState.matches.length;
+              acState.userNavigated = true;
+              renderAcPopup();
+              return;
+            }
+            if (isStaff && !gridState.editing && input.value.trim() === "" && e.altKey) {
+              e.preventDefault();
+              openAcForInput(input, true);
+              return;
+            }
+            if (isTable && !gridState.editing) {
+              e.preventDefault();
+              focusGridCell(r + 1, c);
+              return;
+            }
+          }
+
+          if (e.key === "ArrowUp") {
+            if (isAcOpen) {
+              e.preventDefault();
+              acState.activeIndex = (acState.activeIndex - 1 + acState.matches.length) % acState.matches.length;
+              acState.userNavigated = true;
+              renderAcPopup();
+              return;
+            }
+            if (isTable && !gridState.editing) {
+              e.preventDefault();
+              focusGridCell(r - 1, c);
+              return;
+            }
+          }
+
+          if (isTable && !gridState.editing && e.key === "ArrowLeft") {
+            e.preventDefault();
+            focusGridCell(r, c - 1);
+            return;
+          }
+
+          if (isTable && !gridState.editing && e.key === "ArrowRight") {
+            e.preventDefault();
+            focusGridCell(r, c + 1);
+            return;
+          }
+
+          if ((e.key === "Delete" || e.key === "Backspace") && !gridState.editing) {
+            e.preventDefault();
+            if (isTable) {
+              clearSelectedCells();
+            } else if (input.value !== "") {
+              ensureCellSnapshot();
+              input.value = "";
+              const id = Number(input.dataset.editId);
+              const row = allRows.find((rw) => rw.id === id);
+              if (row) {
+                row[field] = "";
+                scheduleSave();
+                commitRowFieldVisuals();
+              }
+            }
+            return;
+          }
+
+          if (
+            !gridState.editing &&
+            e.key.length === 1 &&
+            !e.ctrlKey &&
+            !e.metaKey &&
+            !e.altKey
+          ) {
+            if (isTable) setSingleSelection(r, c);
+            ensureCellSnapshot();
+            gridState.originalValue = input.value;
+            input.value = "";
+            setCellEditMode(input, true, false);
+          }
+        }, true);
+
+        if (isTable) {
+          container.addEventListener("paste", (e) => {
+            const input = e.target.closest("[data-edit-id]");
+            if (!input) return;
+            const text = (e.clipboardData || window.clipboardData).getData("text/plain");
+            if (!text) return;
+
+            const hasGrid = text.includes("\t") || text.includes("\n") || text.includes("\r");
+            if (!hasGrid && gridState.editing) return;
+
+            e.preventDefault();
+            ensureCellSnapshot();
+
+            const lines = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
+            if (lines.length > 1 && lines[lines.length - 1] === "") lines.pop();
+
+            const startR = Number(input.dataset.r);
+            const startC = Number(input.dataset.c);
+
+            for (let dr = 0; dr < lines.length; dr++) {
+              const targetRow = currentPageRows[startR + dr];
+              if (!targetRow) break;
+              const cols = lines[dr].split("\t");
+              for (let dc = 0; dc < cols.length; dc++) {
+                const colDef = COLUMNS[startC + dc];
+                if (!colDef) break;
+                targetRow[colDef.key] = cols[dc].toUpperCase();
+              }
+            }
+
+            scheduleSave();
+            recomputeShadingAndStarts();
+            refreshFilterOptions();
+            render();
+            focusGridCell(startR, startC);
+          });
+        }
+      }
+
+      setupCellContainerEvents(el.tableBody, true);
+      setupCellContainerEvents(el.cardsWrap, false);
+
+      document.addEventListener("keydown", (e) => {
+        const inModalOrSearch = document.activeElement && (
+          document.activeElement.closest(".modal") ||
+          document.activeElement.closest("#colFilterPopup") ||
+          document.activeElement === el.globalSearch
+        );
+        if (inModalOrSearch || gridState.editing) return;
+
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
+          e.preventDefault();
+          if (e.shiftKey) {
+            performRedo();
+          } else {
+            performUndo();
+          }
+        } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") {
+          e.preventDefault();
+          performRedo();
+        }
+      });
+
+      /* ---------------- Row & Flight Actions (X, C Toggle, S Toggle) ---------------- */
+      function getFlightRange(idx) {
+        const ref = allRows[idx];
+        const targetKey = flightBlockKey(ref);
+        let start = idx;
+        while (start > 0 && flightBlockKey(allRows[start - 1]) === targetKey) {
+          start--;
+        }
+        let end = idx;
+        while (end + 1 < allRows.length && flightBlockKey(allRows[end + 1]) === targetKey) {
+          end++;
+        }
+        return { start, end, count: end - start + 1, ref };
+      }
+
+      function deleteEntireFlightAt(idx) {
+        const { start, count, ref } = getFlightRange(idx);
+        if (!confirm(`Delete entire flight ${ref.flight || "(Blank)"} on ${ref.date} (${count} ${count === 1 ? "row" : "rows"})?`)) {
+          return;
+        }
+        pushUndoSnapshot();
+        allRows.splice(start, count);
+        recomputeShadingAndStarts();
+        scheduleSave();
+        refreshFilterOptions();
+        render();
+      }
+
+      function cloneRowClean(r) {
+        return {
+          id: r.id,
+          date: r.date,
+          time: r.time,
+          flight: r.flight,
+          sta: r.sta,
+          std: r.std,
+          duty: r.duty,
+          staff: r.staff,
+          nature: r.nature,
+          coHrs: r.coHrs,
+          isNewFlight: r.isNewFlight,
+          flightGroupId: r.flightGroupId,
+          savedRows: null,
+          isFlightStart: false,
+          shaded: false
+        };
+      }
+
+      function toggleFlightStatusAt(idx, statusText) {
+        const { start, end, count, ref } = getFlightRange(idx);
+
+        if (ref.sta === statusText && ref.std === statusText) {
+          if (Array.isArray(ref.savedRows) && ref.savedRows.length > 0) {
+            pushUndoSnapshot();
+            const restored = ref.savedRows.map((sr) => ({
+              ...cloneRowClean(sr),
+              date: ref.date,
+              time: ref.time,
+              flight: ref.flight
+            }));
+            allRows.splice(start, count, ...restored);
+            recomputeShadingAndStarts();
+            scheduleSave();
+            if (state.filters.sta.has(statusText)) {
+              state.filters.sta.delete(statusText);
+            }
+            if (state.filters.std.has(statusText)) {
+              state.filters.std.delete(statusText);
+            }
+            refreshFilterOptions();
+            render();
+          } else {
+            alert("Original rows were not saved for this manually edited row. Use Undo (Ctrl+Z) or insert rows.");
+          }
+          return;
+        }
+
+        const savedSnapshot = Array.isArray(ref.savedRows) && ref.savedRows.length > 0
+          ? ref.savedRows.map(cloneRowClean)
+          : allRows.slice(start, end + 1).map(cloneRowClean);
+
+        pushUndoSnapshot();
+        const singleRow = {
+          id: ref.id,
+          date: ref.date,
+          time: ref.time,
+          flight: ref.flight,
+          sta: statusText,
+          std: statusText,
+          duty: "",
+          staff: "",
+          nature: "",
+          coHrs: "",
+          isNewFlight: ref.isNewFlight,
+          flightGroupId: ref.flightGroupId,
+          savedRows: savedSnapshot,
+          isFlightStart: true,
+          shaded: ref.shaded
+        };
+
+        allRows.splice(start, count, singleRow);
+        recomputeShadingAndStarts();
+        scheduleSave();
+
+        if (state.filters.sta.size > 0 && !state.filters.sta.has(statusText)) {
+          state.filters.sta.clear();
+        }
+        if (state.filters.std.size > 0 && !state.filters.std.has(statusText)) {
+          state.filters.std.clear();
+        }
+        if (state.filters.duty.size > 0) {
+          state.filters.duty.clear();
+        }
+
+        refreshFilterOptions();
+        render();
+      }
+
+      function handleRowAction(e) {
+        const btn = e.target.closest("[data-action]");
+        if (!btn) return;
+        e.stopPropagation();
+        const action = btn.dataset.action;
+        const id = Number(btn.dataset.rowId);
+        const idx = allRows.findIndex((r) => r.id === id);
+        if (idx === -1) return;
+
+        if (action === "delete-flight") {
+          deleteEntireFlightAt(idx);
+          return;
+        }
+
+        if (action === "cancel-flight") {
+          toggleFlightStatusAt(idx, "CANCELLED");
+          return;
+        }
+
+        if (action === "suspend-flight") {
+          toggleFlightStatusAt(idx, "SUSPENDED");
+          return;
+        }
+
+        if (action === "delete") {
+          const target = allRows[idx];
+          if (target.staff || target.duty) {
+            if (!confirm(`Delete row (${target.date} | ${target.flight || "Blank"} | ${target.duty || "Blank"})?`)) return;
+          }
+          pushUndoSnapshot();
+          allRows.splice(idx, 1);
+          recomputeShadingAndStarts();
+          scheduleSave();
+          refreshFilterOptions();
+          render();
+          return;
+        }
+
+        pushUndoSnapshot();
+        const ref = allRows[idx];
+        const newRow = {
+          id: nextUid++,
+          date: ref.date,
+          time: ref.time,
+          flight: ref.flight,
+          sta: ref.sta,
+          std: ref.std,
+          duty: "",
+          staff: "",
+          nature: "",
+          coHrs: "",
+          isNewFlight: ref.isNewFlight,
+          flightGroupId: ref.flightGroupId,
+          savedRows: null,
+          isFlightStart: false,
+          shaded: ref.shaded
+        };
+
+        const insertIdx = action === "insert-above" ? idx : idx + 1;
+        allRows.splice(insertIdx, 0, newRow);
+        recomputeShadingAndStarts();
+        scheduleSave();
+        refreshFilterOptions();
+        render();
+
+        const focusEl = document.querySelector(`[data-edit-id="${newRow.id}"][data-edit-field="duty"]`);
+        if (focusEl) {
+          isMouseClickFocus = false;
+          focusEl.focus();
+          setCellEditMode(focusEl, true, true);
+        }
+      }
+
+      el.tableBody.addEventListener("click", handleRowAction);
+      el.cardsWrap.addEventListener("click", handleRowAction);
+
+      /* ---------------- Add Single Flight (Auto-placed by STD) ---------------- */
+      function parseDateValue(str) {
+        const m = String(str).trim().match(/^(\d{1,2})-([A-Za-z]{3})-(\d{2,4})/);
+        if (!m) return null;
+        const day = Number(m[1]);
+        const mon = MONTH_NAMES_SHORT.findIndex((x) => x.toLowerCase() === m[2].toLowerCase());
+        if (mon === -1) return null;
+        let yr = Number(m[3]);
+        if (yr < 100) yr += 2000;
+        return Date.UTC(yr, mon, day);
+      }
+
+      function findAutoInsertIndexByStd(date, std) {
+        const newStdNum = parseStdValue(std);
+        let lastDateIdx = -1;
+
+        for (let i = 0; i < allRows.length; i++) {
+          if (allRows[i].date.toLowerCase() === date.toLowerCase()) {
+            lastDateIdx = i;
+            if (parseStdValue(allRows[i].std) > newStdNum) {
+              return i;
+            }
+          }
+        }
+
+        if (lastDateIdx !== -1) {
+          return lastDateIdx + 1;
+        }
+
+        const newDateTs = parseDateValue(date);
+        if (newDateTs !== null) {
+          for (let i = 0; i < allRows.length; i++) {
+            const rowTs = parseDateValue(allRows[i].date);
+            if (rowTs !== null && rowTs > newDateTs) {
+              return i;
+            }
+          }
+        }
+        return allRows.length;
+      }
+
+      function openAddFlightModal() {
+        const dateItems = getCascadingOptions("date").filter((x) => x.value !== "__BLANK__");
+        const allDates = Array.from(new Set(allRows.map((r) => r.date).filter(Boolean)));
+        el.dateOptionsList.innerHTML = allDates.map((d) => `<option value="${esc(d)}"></option>`).join("");
+
+        const selectedDates = Array.from(state.filters.date).filter((v) => v !== "__BLANK__");
+        el.afDate.value = selectedDates.length === 1
+          ? selectedDates[0]
+          : (dateItems[0] ? dateItems[0].value : (allDates[0] || ""));
+
+        const selectedTimes = Array.from(state.filters.time).filter((v) => v !== "__BLANK__");
+        el.afTime.value = selectedTimes.length === 1 ? selectedTimes[0] : "0600-1400";
+        el.afFlight.value = "";
+        el.afSta.value = "";
+        el.afStd.value = "";
+        el.addFlightModal.classList.add("open");
+        el.afFlight.focus();
+      }
+
+      function closeAddFlightModal() {
+        el.addFlightModal.classList.remove("open");
+      }
+
+      el.openAddFlightBtn.addEventListener("click", openAddFlightModal);
+      el.closeAddFlightBtn.addEventListener("click", closeAddFlightModal);
+      el.cancelAddFlightBtn.addEventListener("click", closeAddFlightModal);
+      el.addFlightModal.addEventListener("click", (e) => {
+        if (e.target === el.addFlightModal) closeAddFlightModal();
+      });
+
+      el.addFlightForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const rawDate = el.afDate.value.trim();
+        const existingDateMatch = allRows.find((r) => r.date.toLowerCase() === rawDate.toLowerCase());
+        const date = existingDateMatch ? existingDateMatch.date : rawDate.toUpperCase();
+        const time = el.afTime.value.trim().toUpperCase();
+        const flight = el.afFlight.value.trim().toUpperCase();
+        const sta = el.afSta.value.trim().toUpperCase();
+        const std = el.afStd.value.trim().toUpperCase();
+        const patKey = el.afTemplate.value;
+
+        pushUndoSnapshot();
+
+        const groupId = nextGroupId++;
+        const duties = DUTY_PATTERNS[patKey] || DUTY_PATTERNS.A;
+        const newRows = duties.map((duty) => ({
+          id: nextUid++,
+          date,
+          time,
+          flight,
+          sta,
+          std,
+          duty,
+          staff: "",
+          nature: "",
+          coHrs: "",
+          isNewFlight: true,
+          flightGroupId: groupId,
+          savedRows: null,
+          isFlightStart: false,
+          shaded: false
+        }));
+
+        const insertAt = findAutoInsertIndexByStd(date, std);
+        allRows.splice(insertAt, 0, ...newRows);
+        recomputeShadingAndStarts();
+        scheduleSave();
+
+        if (state.filters.flight.size > 0 && !state.filters.flight.has(flight)) {
+          state.filters.flight.clear();
+        }
+        if (state.filters.sta.size > 0 && !state.filters.sta.has(sta)) {
+          state.filters.sta.clear();
+        }
+        if (state.filters.std.size > 0 && !state.filters.std.has(std)) {
+          state.filters.std.clear();
+        }
+
+        refreshFilterOptions();
+
+        const filtered = getFilteredRows();
+        if (state.viewMode === "cards") {
+          const groups = groupRowsIntoFlights(filtered);
+          const grpIdx = groups.findIndex((g) => g.head.id === newRows[0].id);
+          if (grpIdx !== -1 && state.pageSize !== "all") {
+            const flightsPerPage = Math.max(10, Math.round(Number(state.pageSize) / 10));
+            state.page = Math.floor(grpIdx / flightsPerPage) + 1;
+          }
+        } else {
+          const firstNewPos = filtered.findIndex((r) => r.id === newRows[0].id);
+          if (firstNewPos !== -1 && state.pageSize !== "all") {
+            state.page = Math.floor(firstNewPos / Number(state.pageSize)) + 1;
+          }
+        }
+
+        closeAddFlightModal();
+        render();
+      });
+
+      /* ---------------- Weekly Flight Schedule Modal ---------------- */
+      let wsActiveDay = "Sun";
+
+      function summarizeDuties(duties) {
+        const counts = new Map();
+        for (const d of duties) {
+          counts.set(d, (counts.get(d) || 0) + 1);
+        }
+        return Array.from(counts.entries())
+          .map(([d, n]) => (n > 1 ? `${n}× ${d}` : d))
+          .join(", ");
+      }
+
+      function renderWeeklyModal() {
+        el.wsDayTabs.innerHTML = WEEKDAYS.map((day) => {
+          const cnt = (weeklySchedule[day] || []).length;
+          return `<button class="ws-tab ${day === wsActiveDay ? "active" : ""}" type="button" data-ws-day="${day}">${day} (${cnt})</button>`;
+        }).join("");
+
+        const flights = (weeklySchedule[wsActiveDay] || []).slice().sort((a, b) => parseStdValue(a.std) - parseStdValue(b.std));
+        weeklySchedule[wsActiveDay] = flights;
+
+        if (flights.length === 0) {
+          el.wsTableBody.innerHTML = `<tr><td colspan="6" style="padding:18px;color:var(--muted);">No flights scheduled for ${wsActiveDay}. Add one below.</td></tr>`;
+        } else {
+          el.wsTableBody.innerHTML = flights.map((fl, idx) => `
+            <tr>
+              <td>${esc(fl.time)}</td>
+              <td><strong>${esc(fl.flight)}</strong></td>
+              <td>${esc(fl.sta)}</td>
+              <td>${esc(fl.std)}</td>
+              <td class="ws-duties-cell"><strong>(${fl.duties.length})</strong> ${esc(summarizeDuties(fl.duties))}</td>
+              <td>
+                <button class="act-btn del" type="button" data-ws-del="${idx}" title="Delete from ${wsActiveDay}">× Del</button>
+              </td>
+            </tr>
+          `).join("");
+        }
+
+        el.wsDaysChecks.innerHTML = WEEKDAYS.map((day) => `
+          <label class="ws-day-chk">
+            <input type="checkbox" value="${day}" ${day === wsActiveDay ? "checked" : ""} />
+            <span>${day}</span>
+          </label>
+        `).join("");
+      }
+
+      function openWeeklyModal() {
+        el.wsCustomDuties.value = DUTY_PATTERNS[el.wsPreset.value].join(", ");
+        renderWeeklyModal();
+        el.weeklyModal.classList.add("open");
+      }
+
+      function closeWeeklyModal() {
+        el.weeklyModal.classList.remove("open");
+      }
+
+      el.weeklyScheduleBtn.addEventListener("click", openWeeklyModal);
+      el.closeWeeklyBtn.addEventListener("click", closeWeeklyModal);
+      el.wsDoneBtn.addEventListener("click", closeWeeklyModal);
+      el.weeklyModal.addEventListener("click", (e) => {
+        if (e.target === el.weeklyModal) closeWeeklyModal();
+      });
+
+      el.wsDayTabs.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-ws-day]");
+        if (!btn) return;
+        wsActiveDay = btn.dataset.wsDay;
+        renderWeeklyModal();
+      });
+
+      el.wsTableBody.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-ws-del]");
+        if (!btn) return;
+        const idx = Number(btn.dataset.wsDel);
+        const target = weeklySchedule[wsActiveDay][idx];
+        if (!target) return;
+        if (!confirm(`Remove ${target.flight} (${target.sta}/${target.std}) from ${wsActiveDay} weekly schedule?`)) return;
+        weeklySchedule[wsActiveDay].splice(idx, 1);
+        scheduleSave();
+        renderWeeklyModal();
+      });
+
+      el.wsPreset.addEventListener("change", () => {
+        const pat = DUTY_PATTERNS[el.wsPreset.value] || DUTY_PATTERNS.A;
+        el.wsCustomDuties.value = pat.join(", ");
+      });
+
+      el.wsAllDaysBtn.addEventListener("click", () => {
+        const checks = Array.from(el.wsDaysChecks.querySelectorAll('input[type="checkbox"]'));
+        const allChecked = checks.every((c) => c.checked);
+        checks.forEach((c) => { c.checked = !allChecked; });
+      });
+
+      el.wsAddForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const checkedDays = Array.from(el.wsDaysChecks.querySelectorAll('input[type="checkbox"]:checked')).map((c) => c.value);
+        if (checkedDays.length === 0) {
+          alert("Please select at least one day of the week.");
+          return;
+        }
+        const duties = el.wsCustomDuties.value
+          .split(",")
+          .map((d) => d.trim().toUpperCase())
+          .filter(Boolean);
+        if (duties.length === 0) {
+          alert("Please enter at least one duty.");
+          return;
+        }
+
+        const entry = {
+          time: el.wsTime.value.trim().toUpperCase(),
+          flight: el.wsFlight.value.trim().toUpperCase(),
+          sta: el.wsSta.value.trim().toUpperCase(),
+          std: el.wsStd.value.trim().toUpperCase(),
+          duties
+        };
+
+        for (const day of checkedDays) {
+          if (!weeklySchedule[day]) weeklySchedule[day] = [];
+          weeklySchedule[day].push({
+            time: entry.time,
+            flight: entry.flight,
+            sta: entry.sta,
+            std: entry.std,
+            duties: entry.duties.slice()
+          });
+          weeklySchedule[day].sort((a, b) => parseStdValue(a.std) - parseStdValue(b.std));
+        }
+
+        scheduleSave();
+        el.wsFlight.value = "";
+        el.wsSta.value = "";
+        el.wsStd.value = "";
+        renderWeeklyModal();
+      });
+
+      el.wsResetDefaultBtn.addEventListener("click", () => {
+        if (!confirm("Reset the 7-day Weekly Flight Schedule back to the original default schedule?")) return;
+        weeklySchedule = buildDefaultWeeklySchedule();
+        scheduleSave();
+        renderWeeklyModal();
+      });
+
+      el.wsApplyToMonthBtn.addEventListener("click", () => {
+        const [y, m] = activeMonthKey.split("-").map(Number);
+        const monthTitle = `${MONTH_NAMES_FULL[m - 1]} ${y}`;
+        if (!confirm(`Rebuild ${monthTitle} from the current Weekly Flight Schedule? (Existing Staff entries in ${monthTitle} will be replaced, and you can undo with Ctrl+Z.)`)) {
+          return;
+        }
+        pushUndoSnapshot();
+        allRows = generateMonthRows(y, m - 1, weeklySchedule, nextUid);
+        nextUid = allRows.reduce((mx, r) => Math.max(mx, Number(r.id) || 0), 0) + 1;
+        recomputeShadingAndStarts();
+        scheduleSave();
+        resetAllFiltersOnly();
+        refreshFilterOptions();
+        closeWeeklyModal();
+        render();
+      });
+
+      /* ---------------- Export & Import Backup ---------------- */
+      el.exportBackupBtn.addEventListener("click", () => {
+        rostersByMonth[activeMonthKey] = serializeRows(allRows, true);
+        const backup = {
+          app: "FlightDutyRoster",
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          activeMonth: activeMonthKey,
+          weeklySchedule,
+          rostersByMonth
+        };
+        const json = JSON.stringify(backup, null, 2);
+        const blob = new Blob([json], { type: "application/json;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        const stamp = new Date().toISOString().slice(0, 10);
+        a.href = url;
+        a.download = `flight-roster-backup-${stamp}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+
+      el.importBackupBtn.addEventListener("click", () => {
+        el.importBackupInput.click();
+      });
+
+      el.importBackupInput.addEventListener("change", (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const parsed = JSON.parse(ev.target.result);
+            if (
+              !parsed ||
+              parsed.app !== "FlightDutyRoster" ||
+              !parsed.weeklySchedule ||
+              !parsed.rostersByMonth
+            ) {
+              alert("Invalid backup file format.");
+              return;
+            }
+            if (!confirm(`Restore backup exported on ${parsed.exportedAt ? parsed.exportedAt.slice(0, 10) : "unknown date"}? This will replace your current roster and weekly schedule.`)) {
+              return;
+            }
+            weeklySchedule = parsed.weeklySchedule;
+            rostersByMonth = parsed.rostersByMonth;
+            activeMonthKey = parsed.activeMonth || "2026-11";
+            if (!rostersByMonth[activeMonthKey]) {
+              const firstKey = Object.keys(rostersByMonth)[0] || "2026-11";
+              activeMonthKey = firstKey;
+            }
+            allRows = rostersByMonth[activeMonthKey]
+              ? hydrateRows(rostersByMonth[activeMonthKey])
+              : buildNov2026ExactRows();
+
+            nextUid = allRows.reduce((m, r) => Math.max(m, Number(r.id) || 0), 0) + 1;
+            nextGroupId = allRows.reduce((m, r) => Math.max(m, Number(r.flightGroupId) || 0), 0) + 1;
+            undoStack.length = 0;
+            redoStack.length = 0;
+            updateUndoButtons();
+            recomputeShadingAndStarts();
+            syncMonthControlsUI();
+            resetAllFiltersOnly();
+            closeColFilterPopup();
+            refreshFilterOptions();
+            scheduleSave();
+            render();
+            alert("Backup restored successfully!");
+          } catch (err) {
+            alert("Could not read backup JSON file.");
+          } finally {
+            el.importBackupInput.value = "";
+          }
+        };
+        reader.readAsText(file);
+      });
+
+      /* ---------------- Shortcuts Modal ---------------- */
+      el.shortcutsBtn.addEventListener("click", () => {
+        el.shortcutsModal.classList.add("open");
+      });
+      el.closeShortcutsBtn.addEventListener("click", () => {
+        el.shortcutsModal.classList.remove("open");
+      });
+      el.shortcutsModal.addEventListener("click", (e) => {
+        if (e.target === el.shortcutsModal) el.shortcutsModal.classList.remove("open");
+      });
+
+      /* ---------------- Filter Chips & Toolbar Events ---------------- */
+      el.activeFilters.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-clear-chip]");
+        if (!btn) return;
+        const key = btn.dataset.clearChip;
+        const val = btn.dataset.clearVal;
+        if (key === "__GLOBAL__") {
+          state.globalSearch = "";
+          el.globalSearch.value = "";
+        } else if (val === "__ALL_COL__") {
+          state.filters[key].clear();
+        } else {
+          state.filters[key].delete(val);
+        }
+        state.page = 1;
+        refreshFilterOptions();
+        render();
+      });
+
+      el.globalSearch.addEventListener("input", (e) => {
+        state.globalSearch = e.target.value;
+        state.page = 1;
+        refreshFilterOptions();
+        render();
+      });
+
+      el.toggleFiltersBtn.addEventListener("click", () => {
+        state.filtersOpen = !state.filtersOpen;
+        render();
+      });
+
+      el.toggleViewBtn.addEventListener("click", () => {
+        state.viewMode = state.viewMode === "table" ? "cards" : "table";
+        state.page = 1;
+        closeColFilterPopup();
+        render();
+      });
+
+      el.resetFiltersBtn.addEventListener("click", () => {
+        resetAllFiltersOnly();
+        closeColFilterPopup();
+        refreshFilterOptions();
+        render();
+      });
+
+      el.pageSizeSelect.addEventListener("change", (e) => {
+        state.pageSize = e.target.value;
+        state.page = 1;
+        render();
+      });
+
+      el.prevPageBtn.addEventListener("click", () => {
+        if (state.page > 1) {
+          state.page--;
+          render();
+        }
+      });
+
+      el.nextPageBtn.addEventListener("click", () => {
+        state.page++;
+        render();
+      });
+
+      el.exportCsvBtn.addEventListener("click", () => {
+        const rows = getFilteredRows();
+        const csvEscape = (v) => `"${String(v).replace(/"/g, '""')}"`;
+        const header = COLUMNS.map((c) => csvEscape(c.label)).join(",");
+        const lines = rows.map((r) => COLUMNS.map((c) => csvEscape(r[c.key])).join(","));
+        const csv = "\uFEFF" + [header, ...lines].join("\r\n");
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `flight-roster-${activeMonthKey}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+
+      el.resetDataBtn.addEventListener("click", () => {
+        if (!confirm("Reset all months, cell edits, inserted rows, and weekly schedule changes back to default?")) return;
+        try {
+          localStorage.removeItem(STORAGE_KEY);
+        } catch (e) {}
+        hasCustomChanges = false;
+        undoStack.length = 0;
+        redoStack.length = 0;
+        updateUndoButtons();
+        weeklySchedule = buildDefaultWeeklySchedule();
+        rostersByMonth = {};
+        activeMonthKey = "2026-11";
+        allRows = buildNov2026ExactRows();
+        rostersByMonth["2026-11"] = serializeRows(allRows, true);
+        nextUid = allRows.reduce((m, r) => Math.max(m, Number(r.id) || 0), 0) + 1;
+        nextGroupId = 1;
+        recomputeShadingAndStarts();
+        syncMonthControlsUI();
+        resetAllFiltersOnly();
+        closeColFilterPopup();
+        refreshFilterOptions();
+        render();
+      });
+
+      initMonthControls();
+      initHeadersAndFilters();
+      updateUndoButtons();
+      applyZoom(state.zoom);
+      render();
+    })();
+  </script>
+</body>
+</html>
